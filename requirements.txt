@@ -2,3 +2,4 @@ beautifulsoup4==4.11.1
 pystyle==2.0
 requests==2.27.1
 tqdm==4.64.0
+contextlib3==3.10.0

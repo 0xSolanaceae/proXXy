@@ -6,7 +6,7 @@ ProXXy is a tool for scraping and regularizing proxy lists. It can be used to co
 
 To install ProXXy, follow these steps:
 
-1. Clone the repository: `git clone https://github.com/example/proXXy.git`
+1. Clone the repository: `git clone https://github.com/Atropa-Solanaceae/proXXy.git`
 2. Navigate to the project directory: `cd proXXy`
 3. Install the required dependencies: `pip3 install -r requirements.txt`
 

@@ -1,4 +1,4 @@
-beautifulsoup4==4.10.1
-pystyle==1.0.0
-requests==2.26.0
+beautifulsoup4==4.11.1
+pystyle==2.0
+requests==2.27.1
 tqdm==4.64.0

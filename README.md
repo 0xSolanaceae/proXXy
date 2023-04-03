@@ -14,9 +14,9 @@ To install ProXXy, follow these steps:
 
 To use ProXXy, follow these steps:
 
-1. Place any text files containing proxy lists in the project directory.
+1. Ensure all files are within the same directory.
 2. Run the program: `python3 proXXy.py`
-3. Follow the prompts to select the type of proxies to scrape and regularize.
+3. Wait until the program completes, then check the new text files!
 
 The program will output three files in the project directory containing the regularized proxy lists: `http.txt`, `socks4.txt`, and `socks5.txt`.
 

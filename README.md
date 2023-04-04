@@ -22,6 +22,7 @@ The program will output three files in the project directory containing the regu
 
 ## Planned Features
 - Implement a feature for automatically testing the scraped proxies to verify their functionality.
+- Provide an option to only write Elite, Anonymous, or Transparent proxies to lists.
 - Improve error handling and logging for more informative feedback to the user.
 - Add support for HTTPS proxies.
 

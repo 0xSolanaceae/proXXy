@@ -18,7 +18,7 @@ To use ProXXy, follow these steps:
 2. Run the program: `python3 proXXy.py`
 3. Wait until the program completes, then check the new text files!
 
-The program will output three files in the project directory containing the regularized proxy lists: `http.txt`, `socks4.txt`, and `socks5.txt`.
+The program will output three files in the project directory containing the regularized proxy lists: `http.txt`, `socks4.txt`, and `socks5.txt`, along with an error logging file named `error.log` to assist you in debugging.
 
 ## Planned Features
 - Implement a feature for automatically testing the scraped proxies to verify their functionality.

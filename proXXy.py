@@ -8,7 +8,6 @@ import threading
 import contextlib
 import requests
 import warnings
-import shutil
 import urllib.request
 from bs4 import BeautifulSoup
 from pystyle import *
@@ -29,9 +28,7 @@ os.system("title proXXy")
 os.system('cls' if os.name == 'nt' else 'clear')
 print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, S, 1)))
 print("")
-width, height = shutil.get_terminal_size()
-dashes = "-" * width
-print(dashes)
+print("<---------------------------------------------------------------------------------------------------------------------->")
 
 import tqdm
 
@@ -277,7 +274,7 @@ def init_main(error_log, proxy_file, site, timeout):
     print("")
 
     init_proxy_checker(proxy_file, site, timeout)
-    print(dashes)
+    print("<---------------------------------------------------------------------------------------------------------------------->")
 
 def main():
     # these are for the checking of http proxies

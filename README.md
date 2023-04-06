@@ -1,6 +1,6 @@
 # ProXXy
 
-ProXXy is a tool for scraping and regularizing proxy lists. It can be used to collect and organize lists of HTTP, SOCKS4, and SOCKS5 proxies for use in web scraping, data mining, DDoSing, and other tasks. Currently finds more than 100k working proxies from ~100 different sources.
+ProXXy is a tool for scraping and regularizing proxy lists. It can be used to collect and organize lists of HTTP, SOCKS4, and SOCKS5 proxies for use in web scraping, data mining, *simulated* DDoS attacks, and other tasks. Currently finds more than 100k working proxies from ~100 different sources.
 
 ## Installation
 
@@ -30,6 +30,9 @@ The program will output three files in the project directory containing the regu
 - Added a function to remove duplicate proxies from the generated lists.
 - Added a function to regularize proxies by removing trash values.
 - Updated the proxy scraping function to use contextlib.suppress for better error handling.
+
+## Disclaimer
+This project is for educational purposes only-- Please do not use this for illegal activities.
 
 ## License
 

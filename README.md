@@ -1,6 +1,6 @@
 # ProXXy
 
-ProXXy is a tool for scraping and regularizing proxy lists. It can be used to collect and organize lists of HTTP, SOCKS4, and SOCKS5 proxies for use in web scraping, data mining, *simulated* DDoS attacks, and other tasks. Currently finds more than 100k working proxies from ~100 different sources.
+ProXXy is a tool for scraping and regularizing proxy lists. It can be used to collect and organize lists of HTTP, SOCKS4, and SOCKS5 proxies for use in web scraping, data mining, *simulated* DDoS attacks, and other tasks. Currently finds more than 100k proxies from ~100 different sources.
 
 ## Installation
 

@@ -32,7 +32,7 @@ print("<------------------------------------------------------------------------
 
 import tqdm
 
-def proxy_sources(): # http://sslproxies.org for HTTPs eventually
+def proxy_sources():
     return {
         "HTTP": [
             "https://raw.githubusercontent.com/B4RC0DE-TM/proxy-list/main/HTTP.txt",
@@ -81,7 +81,14 @@ def proxy_sources(): # http://sslproxies.org for HTTPs eventually
             "https://www.my-proxy.com/free-proxy-list-8.html",
             "https://www.my-proxy.com/free-proxy-list-9.html",
             "https://www.my-proxy.com/free-proxy-list-10.html",
-            "https://www.freeproxychecker.com/result/http_proxies.txt",
+            "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies/http.txt",
+            "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies_anonymous/http.txt",
+            "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/http.txt",
+            "https://sunny9577.github.io/proxy-scraper/proxies.txt",
+            "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/http.txt", # good one
+            "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/http.txt",
+            "https://raw.githubusercontent.com/prxchk/proxy-list/main/http.txt",
+            "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/http.txt",
         ],
         "SOCKS4": [
             "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks4",
@@ -100,11 +107,17 @@ def proxy_sources(): # http://sslproxies.org for HTTPs eventually
             "https://www.proxyscan.io/download?type=socks4",
             "https://www.my-proxy.com/free-socks-4-proxy.html",
             "http://www.socks24.org/feeds/posts/default",
-            "https://www.freeproxychecker.com/result/socks4_proxies.txt",
             "https://raw.githubusercontent.com/HyperBeats/proxy-list/main/socks4.txt",
             "https://raw.githubusercontent.com/mmpx12/proxy-list/master/socks4.txt",
             "https://raw.githubusercontent.com/saschazesiger/Free-Proxies/master/proxies/socks4.txt",
             "https://raw.githubusercontent.com/B4RC0DE-TM/proxy-list/main/SOCKS4.txt",
+            "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies/socks4.txt",
+            "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies_anonymous/socks4.txt",
+            "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/socks4.txt",
+            "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks4.txt", # good one
+            "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/socks4.txt",
+            "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks4.txt",
+            "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks4.txt",
         ],
         "SOCKS5": [
             "https://raw.githubusercontent.com/B4RC0DE-TM/proxy-list/main/SOCKS5.txt",
@@ -127,11 +140,22 @@ def proxy_sources(): # http://sslproxies.org for HTTPs eventually
             "https://raw.githubusercontent.com/hookzof/socks5_list/master/proxy.txt",
             "http://worm.rip/socks5.txt",
             "http://www.socks24.org/feeds/posts/default",
-            "https://www.freeproxychecker.com/result/socks5_proxies.txt",
             "https://www.proxy-list.download/api/v1/get?type=socks5",
             "https://www.proxyscan.io/download?type=socks5",
             "https://www.my-proxy.com/free-socks-5-proxy.html",
+            "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies/socks5.txt",
+            "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies_anonymous/socks5.txt",
+            "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/socks5.txt",
+            "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks4.txt", # good one
+            "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/socks5.txt",
+            "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks5.txt",
+            "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks5.txt",
         ],
+        #"HTTPS": [ # not implemented yet
+        #    "http://sslproxies.org",
+        #    "https://github.com/jetkai/proxy-list/blob/main/online-proxies/txt/proxies-https.txt",
+        #    "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/https.txt",
+        #]
     }
 
 def process_proxies(protocol):
@@ -150,7 +174,7 @@ def process_proxies(protocol):
     # Overwrite the original text document with the unique proxies
     try:
         with open(f'{protocol}.txt', 'w') as file:
-            for proxy in tqdm.tqdm(unique_proxies, desc=f"Removing Duplicates in {protocol}", ascii=" #", unit= " prox"):
+            for proxy in unique_proxies:
                 file.write(proxy + '\n')
     except IOError:
         print(f"Error: Could not write to {protocol}.txt")
@@ -176,8 +200,21 @@ def regularize_proxies(protocol):
     except IOError:
         print(f"Error: Could not write to {protocol}.txt")
         return
+    
+def proxy_checking(proxy, site, timeout, user_agent, valid_proxies):
+    url = f"http://{proxy}"
+    proxy_support = urllib.request.ProxyHandler({"http": url, "https": url})
+    opener = urllib.request.build_opener(proxy_support)
+    urllib.request.install_opener(opener)
+    req = urllib.request.Request(site, headers={"User-Agent": user_agent})
+    with contextlib.suppress(Exception):
+        start_time = time.time()
+        urllib.request.urlopen(req, timeout=timeout)
+        end_time = time.time()
+        time_taken = end_time - start_time
+        valid_proxies.append((proxy, time_taken))
 
-def init_proxy_checker(proxy_file, site, timeout):
+def proxy_checker(proxy_file, site, timeout, protocol):
     # Load user agents from file
     try:
         with open("user_agents.txt") as f:
@@ -194,7 +231,6 @@ def init_proxy_checker(proxy_file, site, timeout):
         proxies = [line.strip() for line in f]
 
     valid_proxies = []
-    user_agents_list = user_agents.copy()
 
     threads = []
     for proxy in proxies:
@@ -202,11 +238,12 @@ def init_proxy_checker(proxy_file, site, timeout):
         t = threading.Thread(target=proxy_checking, args=(proxy, site, timeout, user_agent, valid_proxies))
         threads.append(t)
 
-    for t in tqdm.tqdm(threads, desc=f'Checking {len(proxies)} HTTP Proxies', unit='prox', ascii=" #"):
+    for t in tqdm.tqdm(threads, desc=f'Checking {len(proxies)} {protocol} Proxies', unit=' prox', ascii=" #"):
         t.start()
 
-    for t in tqdm.tqdm(threads, desc='Joining Threads', unit='threads', ascii=" #"):
+    for t in tqdm.tqdm(threads, desc='Joining Threads', unit=' threads', ascii=" #"):
         t.join()
+    #print("")
 
     # Write working proxies to file
     with open(proxy_file, "w") as f:
@@ -215,22 +252,9 @@ def init_proxy_checker(proxy_file, site, timeout):
 
     total_working_proxies = len(valid_proxies)
     total_lines = len(proxies)
-    print(f"All done! {total_working_proxies} of {total_lines} ({total_working_proxies/total_lines*100:.2f}%) HTTP proxies are currently working.")
-    
-def proxy_checking(proxy, site, timeout, user_agent, valid_proxies):
-    url = f"http://{proxy}"
-    proxy_support = urllib.request.ProxyHandler({"http": url, "https": url})
-    opener = urllib.request.build_opener(proxy_support)
-    urllib.request.install_opener(opener)
-    req = urllib.request.Request(site, headers={"User-Agent": user_agent})
-    with contextlib.suppress(Exception):
-        start_time = time.time()
-        urllib.request.urlopen(req, timeout=timeout)
-        end_time = time.time()
-        time_taken = end_time - start_time
-        valid_proxies.append((proxy, time_taken))
-        
-def init_main(error_log, proxy_file, site, timeout):
+    print(f"All done! {total_working_proxies} of {total_lines} ({total_working_proxies/total_lines*100:.2f}%) {protocol} proxies are currently working.")
+
+def init_main(error_log, site, timeout):
     # proxy sources
     proxies = proxy_sources()
 
@@ -246,13 +270,13 @@ def init_main(error_log, proxy_file, site, timeout):
                     soup = BeautifulSoup(response.content, 'html.parser')
                     scraped_data = soup.get_text()
                     if proxy_type == "HTTP":
-                        with open("http.txt", "a") as file_http:
+                        with open("HTTP.txt", "a") as file_http:
                             file_http.write(scraped_data + '\n')
                     elif proxy_type == "SOCKS4":
-                        with open("socks4.txt", "a") as file_socks4:
+                        with open("SOCKS4.txt", "a") as file_socks4:
                             file_socks4.write(scraped_data + '\n')
                     elif proxy_type == "SOCKS5":
-                        with open("socks5.txt", "a") as file_socks5:
+                        with open("SOCKS5.txt", "a") as file_socks5:
                             file_socks5.write(scraped_data + '\n')
                     accessed_links += 1
                 else:
@@ -269,29 +293,23 @@ def init_main(error_log, proxy_file, site, timeout):
         regularize_proxies(protocol)
     print("")
 
-    for protocol in protocols:
+    for protocol in tqdm.tqdm(protocols, desc="Removing Duplicates", ascii=" #", unit= " prox"):
         process_proxies(protocol)
     print("")
 
-    init_proxy_checker(proxy_file, site, timeout)
+    #for protocol in protocols:
+        #proxy_checker(f"{protocol}.txt", site, timeout, protocol)
     print("<---------------------------------------------------------------------------------------------------------------------->")
 
 def main():
     # these are for the checking of http proxies
-    proxy_file = "http.txt"
-    site = "http://google.com"
+    site = "http://icanhazip.com/"
     timeout = 10
 
     # initialize files
-    with (open("http.txt", "w") as file_http, open("socks4.txt", "w") as file_socks4, open("socks5.txt", "w") as file_socks5, open("error.log", "w") as error_log):
-        init_main(error_log, proxy_file, site, timeout)
+    with (open("HTTP.txt", "w") as file_http, open("SOCKS4.txt", "w") as file_socks4, open("SOCKS5.txt", "w") as file_socks5, open("error.log", "w") as error_log):
+        init_main(error_log, site, timeout)
     
         
 if __name__ == '__main__':
     main()
-
-
-
-
-    
-# Padding to make it to 300 lines :]

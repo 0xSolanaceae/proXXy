@@ -21,7 +21,7 @@ To use ProXXy, follow these steps:
 The program will output three files in the project directory containing the regularized proxy lists: `HTTP.txt`, `SOCKS4.txt`, and `SOCKS5.txt`, along with an error logging file named `error.log` to assist you in debugging.
 
 ## Planned Features 
-`Proxy checking is in beta`
+`Proxy checking is in BETA`
 - Implement a feature for automatically testing the scraped proxies to verify their functionality. (1/3rd completed) 
 - Provide an option to only write Elite, Anonymous, or Transparent proxies to lists.
 - Add support for HTTPS proxies.

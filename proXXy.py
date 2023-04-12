@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3 
 #Coded by Solanaceae
 import os
 import re

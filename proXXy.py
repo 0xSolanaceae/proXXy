@@ -1,20 +1,19 @@
 #!/usr/bin/python3
 #Coded by Solanaceae
-import time
 import os
 import re
+import socks
+import socket
 import random
-import threading
-import contextlib
+import asyncio
 import requests
 import warnings
-import urllib.request
+import contextlib
 from bs4 import BeautifulSoup
 from pystyle import *
 
-warnings.filterwarnings("ignore", category=UserWarning, message=".*looks like you're parsing an XML document using an HTML parser.*")
-
-S = r"""
+def intro(): 
+    S = r"""
  ▄████████  ▄██████▄   ▄█          ▄████████ ███▄▄▄▄      ▄████████  ▄████████    ▄████████    ▄████████    ▄████████ 
   ███    ███ ███    ███ ███         ███    ███ ███▀▀▀██▄   ███    ███ ███    ███   ███    ███   ███    ███   ███    ███ 
   ███    █▀  ███    ███ ███         ███    ███ ███   ███   ███    ███ ███    █▀    ███    █▀    ███    ███   ███    █▀  
@@ -24,12 +23,22 @@ S = r"""
    ▄█    ███ ███    ███ ███▌    ▄   ███    ███ ███   ███   ███    ███ ███    ███   ███    ███   ███    ███   ███    ███ 
  ▄████████▀   ▀██████▀  █████▄▄██   ███    █▀   ▀█   █▀    ███    █▀  ████████▀    ██████████   ███    █▀    ██████████ """
 
-os.system("title proXXy")
-os.system('cls' if os.name == 'nt' else 'clear')
-print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, S, 1)))
-print("")
-print("<---------------------------------------------------------------------------------------------------------------------->")
+    os.system("title proXXy -- by Solanaceae")
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, S, 1)))
+    print("")
+    print("<---------------------------------------------------------------------------------------------------------------------->")
 
+os.system('cls' if os.name == 'nt' else 'clear')
+global rand_UA
+try:
+    intro()
+    rand_UA = input("Would you like to use random user agents? (Y/n): ")
+    rand_UA = rand_UA.lower() != "n"
+except Exception:
+    rand_UA = True
+
+intro()
 import tqdm
 
 def proxy_sources():
@@ -65,7 +74,6 @@ def proxy_sources():
             "https://raw.githubusercontent.com/proxy4parsing/proxy-list/main/http.txt",
             "http://rootjazz.com/proxies/proxies.txt",
             "http://spys.me/proxy.txt",
-            "https://sheesh.rip/http.txt",
             "http://worm.rip/http.txt",
             "https://www.proxy-list.download/api/v1/get?type=http",
             "https://www.proxyscan.io/download?type=http",
@@ -158,7 +166,7 @@ def proxy_sources():
         #]
     }
 
-def process_proxies(protocol):
+def remove_duplicate_proxies(protocol):
     # Read in the text document
     try:
         with open(f'{protocol}.txt', 'r') as file:
@@ -195,64 +203,78 @@ def regularize_proxies(protocol):
     # Overwrite the original text document with the regularized proxies
     try:
         with open(f'{protocol}.txt', 'w') as file:
-            for proxy in tqdm.tqdm(proxies, desc=f"Regularizing {protocol}", ascii=" #", unit= " prox"):
+            for proxy in proxies:
                 file.write(proxy + '\n')
     except IOError:
         print(f"Error: Could not write to {protocol}.txt")
         return
-    
-def proxy_checking(proxy, site, timeout, user_agent, valid_proxies):
-    url = f"http://{proxy}"
-    proxy_support = urllib.request.ProxyHandler({"http": url, "https": url})
-    opener = urllib.request.build_opener(proxy_support)
-    urllib.request.install_opener(opener)
-    req = urllib.request.Request(site, headers={"User-Agent": user_agent})
-    with contextlib.suppress(Exception):
-        start_time = time.time()
-        urllib.request.urlopen(req, timeout=timeout)
-        end_time = time.time()
-        time_taken = end_time - start_time
-        valid_proxies.append((proxy, time_taken))
 
-def proxy_checker(proxy_file, site, timeout, protocol):
-    # Load user agents from file
-    try:
-        with open("user_agents.txt") as f:
-            user_agents = [line.strip() for line in f]
-    except FileNotFoundError:
-        print("Error: user_agents.txt not found")
-        user_agents = []
-    except IOError:
-        print("Error: could not read user_agents.txt")
-        user_agents = []
+def checking_handler(proxy_file, site, timeout, protocol, rand_UA):
+    if protocol == "HTTP":
+        return # temp response TODO
+    elif protocol == "SOCKS4":
+        SOCKS4_check(proxy_file, site, timeout, rand_UA)
+    elif protocol == "SOCKS5":
+        return # temp response TODO
 
-    # Load proxies from file
-    with open(proxy_file) as f:
-        proxies = [line.strip() for line in f]
+def SOCKS4_check(proxy_file, site, timeout, rand_UA):
+    # Set up the SOCKS4 proxy
+    def set_proxy(ip, port):
+        socks.set_default_proxy(socks.SOCKS4, ip, port)
+        socket.socket = socks.socksocket
 
-    valid_proxies = []
+    # Read the user agents from the file
+    with open("user_agents.txt", "r") as f:
+        user_agents = [line.strip() for line in f.readlines()]
 
-    threads = []
-    for proxy in proxies:
-        user_agent = random.choice(user_agents)
-        t = threading.Thread(target=proxy_checking, args=(proxy, site, timeout, user_agent, valid_proxies))
-        threads.append(t)
+    # Function to get a random user agent
+    def get_random_user_agent():
+        return random.choice(user_agents)
 
-    for t in tqdm.tqdm(threads, desc=f'Checking {len(proxies)} {protocol} Proxies', unit=' prox', ascii=" #"):
-        t.start()
+    async def check_proxy(proxy, valid_proxies, rand_UA):
+        with contextlib.suppress(Exception):
+            ip, port = proxy.split(":")
+            set_proxy(ip, int(port))
+            
+            headers = {}
+            if rand_UA:
+                headers["User-Agent"] = get_random_user_agent()
+                
+            reader, writer = await asyncio.open_connection(site, 80, limit=timeout)
+            writer.write(b"GET / HTTP/1.1\r\n")
+            for header, value in headers.items():
+                writer.write(f"{header}: {value}\r\n".encode("utf-8"))
+            writer.write(b"\r\n")
+            writer.close()
+            await writer.wait_closed()
+            valid_proxies.append(proxy)
 
-    for t in tqdm.tqdm(threads, desc='Joining Threads', unit=' threads', ascii=" #"):
-        t.join()
-    #print("")
+    # Read the proxy list from the file
+    with open(proxy_file, "r") as f:
+        proxies = [line.strip() for line in f.readlines()]
 
-    # Write working proxies to file
-    with open(proxy_file, "w") as f:
-        for proxy, _ in valid_proxies:
-            f.write(f"{proxy}\n")
+    # Set up the event loop and run the checks
+    async def main():
+        valid_proxies = []
+        tasks = []
+        with tqdm.tqdm(total=len(proxies), desc="Checking SOCKS4", ascii=" #", unit="prox") as pbar:
+            for proxy in proxies:
+                task = asyncio.create_task(check_proxy(proxy, valid_proxies, rand_UA))
+                task.add_done_callback(lambda _: pbar.update())
+                tasks.append(task)
+            await asyncio.gather(*tasks)
 
-    total_working_proxies = len(valid_proxies)
-    total_lines = len(proxies)
-    print(f"All done! {total_working_proxies} of {total_lines} ({total_working_proxies/total_lines*100:.2f}%) {protocol} proxies are currently working.")
+        percentage = len(valid_proxies) / len(proxies) * 100
+        print(f"Checked! {len(valid_proxies)} of {len(proxies)} ({percentage:.2f}%) SOCKS4 proxies are currently active.")
+        # Write the verified proxies back to the SOCKS4.txt file
+        with open(proxy_file, "w") as f:
+            f.write("\n".join(valid_proxies))
+
+    asyncio.run(main())
+
+
+def SOCKS5_check(proxy_file, site, timeout):
+    pass
 
 def init_main(error_log, site, timeout):
     # proxy sources
@@ -263,7 +285,7 @@ def init_main(error_log, site, timeout):
 
     # webscraping proxies
     for proxy_type, urls in proxies.items():
-        for url in tqdm.tqdm(urls, desc=f"Scraping {proxy_type}", ascii=" #", unit= " prox"):
+        for url in tqdm.tqdm(urls, desc=f"Scraping {proxy_type}", ascii=" #", unit= " src"):
             with contextlib.suppress(requests.exceptions.RequestException):
                 response = requests.get(url)
                 if response.status_code == 200:
@@ -289,27 +311,24 @@ def init_main(error_log, site, timeout):
     print("")
 
     protocols = ["HTTP", "SOCKS4", "SOCKS5"]
-    for protocol in protocols:
+    for protocol in tqdm.tqdm(protocols, desc="Regularizing Proxies", ascii=" #", unit= " prox"):
         regularize_proxies(protocol)
-    print("")
-
     for protocol in tqdm.tqdm(protocols, desc="Removing Duplicates", ascii=" #", unit= " prox"):
-        process_proxies(protocol)
+        remove_duplicate_proxies(protocol)
     print("")
 
-    #for protocol in protocols:
-        #proxy_checker(f"{protocol}.txt", site, timeout, protocol)
+    for protocol in protocols:
+        checking_handler(f"{protocol}.txt", site, timeout, protocol, rand_UA)
+    #SOCKS4_check("SOCKS4.txt", site, 2)
     print("<---------------------------------------------------------------------------------------------------------------------->")
 
 def main():
-    # these are for the checking of http proxies
-    site = "http://icanhazip.com/"
-    timeout = 10
-
+    warnings.filterwarnings("ignore", category=UserWarning, message=".*looks like you're parsing an XML document using an HTML parser.*")
+    site = "www.icanhazip.com"
+    timeout = 10 
     # initialize files
     with (open("HTTP.txt", "w") as file_http, open("SOCKS4.txt", "w") as file_socks4, open("SOCKS5.txt", "w") as file_socks5, open("error.log", "w") as error_log):
         init_main(error_log, site, timeout)
-    
         
 if __name__ == '__main__':
     main()

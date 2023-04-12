@@ -27,6 +27,7 @@ The program will output three files in the project directory containing the regu
 - Add support for HTTPS proxies.
 
 ## Added Features
+- Verified proxies are written to checked file.
 - Improve error handling and logging for more informative feedback to the user.
 - Added a function to remove duplicate proxies from the generated lists.
 - Added a function to regularize proxies by removing trash values.

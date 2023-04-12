@@ -16,7 +16,8 @@ To use ProXXy, follow these steps:
 
 1. Ensure all files are within the same directory.
 2. Run the program: `python3 proXXy.py`
-3. Wait until the program completes, then check the new text files!
+3. Decide whether you want random user agents per each proxy request (may take longer, however it's more anonymous)
+4. Allow the program to complete, then check the new text files!
 
 The program will output three files in the project directory containing the regularized proxy lists: `HTTP.txt`, `SOCKS4.txt`, and `SOCKS5.txt`, along with an error logging file named `error.log` to assist you in debugging.
 
@@ -27,6 +28,7 @@ The program will output three files in the project directory containing the regu
 - Add support for HTTPS proxies.
 
 ## Added Features
+- Added option to choose random user agents with every proxy request.
 - Verified proxies are written to checked file.
 - Improve error handling and logging for more informative feedback to the user.
 - Added a function to remove duplicate proxies from the generated lists.

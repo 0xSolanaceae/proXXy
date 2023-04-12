@@ -22,7 +22,7 @@ The program will output three files in the project directory containing the regu
 
 ## Planned Features 
 `Proxy checking is in BETA`
-- Implement a feature for automatically testing the scraped proxies to verify their functionality. (1/3rd completed) 
+- Implement a feature for automatically testing the scraped proxies to verify their functionality. (1/3rd completed, SOCKS4 currently functions perfectly) 
 - Provide an option to only write Elite, Anonymous, or Transparent proxies to lists.
 - Add support for HTTPS proxies.
 
@@ -39,4 +39,5 @@ This project is for educational purposes only-- Please do not use this for illeg
 
 This project is licensed under the MIT License. See the `LICENSE` file for more information.
 
+![img](https://user-images.githubusercontent.com/89823371/231321673-0b8312c7-0cb2-4ca9-af42-bddf706fa1af.png)
 

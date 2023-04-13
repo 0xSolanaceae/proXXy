@@ -1,4 +1,4 @@
-#!/usr/bin/python3 
+#!/usr/bin/python3
 #Coded by Solanaceae
 import os
 import re
@@ -31,12 +31,16 @@ def intro():
 
 os.system('cls' if os.name == 'nt' else 'clear')
 global rand_UA
+global timeout
+
 try:
     intro()
     rand_UA = input("Would you like to use random user agents? (Y/n): ")
     rand_UA = rand_UA.lower() != "n"
+    timeout = int(input("\nWhat do you want to set the request timeout to? \n(10 seconds is the default, however you may want to use a higher value if you have a slower network): "))
 except Exception:
     rand_UA = True
+    timeout = 10
 
 intro()
 import tqdm
@@ -240,7 +244,7 @@ def SOCKS4_check(proxy_file, site, timeout, rand_UA):
             if rand_UA:
                 headers["User-Agent"] = get_random_user_agent()
                 
-            reader, writer = await asyncio.open_connection(site, 80, limit=timeout)
+            writer = await asyncio.open_connection(site, 80, limit=timeout)
             writer.write(b"GET / HTTP/1.1\r\n")
             for header, value in headers.items():
                 writer.write(f"{header}: {value}\r\n".encode("utf-8"))
@@ -325,7 +329,6 @@ def init_main(error_log, site, timeout):
 def main():
     warnings.filterwarnings("ignore", category=UserWarning, message=".*looks like you're parsing an XML document using an HTML parser.*")
     site = "www.icanhazip.com"
-    timeout = 10 
     # initialize files
     with (open("HTTP.txt", "w") as file_http, open("SOCKS4.txt", "w") as file_socks4, open("SOCKS5.txt", "w") as file_socks5, open("error.log", "w") as error_log):
         init_main(error_log, site, timeout)

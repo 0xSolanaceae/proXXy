@@ -321,9 +321,8 @@ def init_main(error_log, site, timeout):
         remove_duplicate_proxies(protocol)
     print("")
 
-    for protocol in protocols:
-        checking_handler(f"{protocol}.txt", site, timeout, protocol, rand_UA)
-    #SOCKS4_check("SOCKS4.txt", site, 2)
+    #for protocol in protocols:
+        #checking_handler(f"{protocol}.txt", site, timeout, protocol, rand_UA)
     print("<---------------------------------------------------------------------------------------------------------------------->")
 
 def main():

@@ -32,15 +32,19 @@ def intro():
 os.system('cls' if os.name == 'nt' else 'clear')
 global rand_UA
 global timeout
+global prox_check
 
 try:
     intro()
     rand_UA = input("Would you like to use random user agents? (Y/n): ")
     rand_UA = rand_UA.lower() != "n"
     timeout = int(input("\nWhat do you want to set the request timeout to? \n(10 seconds is the default, however you may want to use a higher value if you have a slower network): "))
+    prox_check = input("\nWould you like to check SOCKS4 proxies? (In BETA testing) (y/N): ").lower()
+    prox_check = prox_check == "y"
 except Exception:
     rand_UA = True
     timeout = 10
+    prox_check = False
 
 intro()
 import tqdm
@@ -61,7 +65,6 @@ def proxy_sources():
             "https://proxyspace.pro/https.txt",
             "https://proxy-spider.com/api/proxies.example.txt",
             "http://proxysearcher.sourceforge.net/Proxy%20List.php?type=http",
-            "https://raw.githubusercontent.com/RX4096/proxy-list/main/online/all.txt",
             "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/http.txt",
             "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies_anonymous/http.txt",
             "https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/http.txt",
@@ -71,9 +74,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-http.txt",
             "https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt",
             "https://raw.githubusercontent.com/sunny9577/proxy-scraper/master/proxies.txt",
-            "https://raw.githubusercontent.com/UserR3X/proxy-list/main/online/http.txt",
             "https://raw.githubusercontent.com/roosterkid/openproxylist/main/HTTPS_RAW.txt",
-            "https://raw.githubusercontent.com/UserR3X/proxy-list/main/online/https.txt",
             "https://raw.githubusercontent.com/opsxcq/proxy-list/master/list.txt",
             "https://raw.githubusercontent.com/proxy4parsing/proxy-list/main/http.txt",
             "http://rootjazz.com/proxies/proxies.txt",
@@ -321,15 +322,16 @@ def init_main(error_log, site, timeout):
         remove_duplicate_proxies(protocol)
     print("")
 
-    #for protocol in protocols:
-        #checking_handler(f"{protocol}.txt", site, timeout, protocol, rand_UA)
+    if prox_check == True:
+        for protocol in protocols:
+            checking_handler(f"{protocol}.txt", site, timeout, protocol, rand_UA)
     print("<---------------------------------------------------------------------------------------------------------------------->")
 
 def main():
     warnings.filterwarnings("ignore", category=UserWarning, message=".*looks like you're parsing an XML document using an HTML parser.*")
     site = "www.icanhazip.com"
     # initialize files
-    with (open("HTTP.txt", "w") as file_http, open("SOCKS4.txt", "w") as file_socks4, open("SOCKS5.txt", "w") as file_socks5, open("error.log", "w") as error_log):
+    with (open("HTTP.txt", "w"), open("SOCKS4.txt", "w"), open("SOCKS5.txt", "w"), open("error.log", "w") as error_log):
         init_main(error_log, site, timeout)
         
 if __name__ == '__main__':

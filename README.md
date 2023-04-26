@@ -36,7 +36,7 @@ The program will output three files in the project directory containing the regu
 - Updated the proxy scraping function to use contextlib.suppress for better error handling.
 
 ## Disclaimer
-This project is for educational purposes only—— Please do not use this for illegal activities.
+This project is for educational purposes only— Please do not use this for illegal activities.
 
 ## License
 

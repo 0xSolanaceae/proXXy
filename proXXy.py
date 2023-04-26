@@ -12,6 +12,33 @@ import contextlib
 from bs4 import BeautifulSoup
 from pystyle import *
 
+def parameters():
+    global rand_UA
+    global timeout
+    global prox_check
+
+    try:
+        intro()
+        rand_UA_input = input("Would you like to use random user agents? (Y/n): ")
+        rand_UA = rand_UA_input.lower() != "n"
+    except Exception:
+        print("Invalid input for random user agent, defaulting to True.")
+        rand_UA = True
+
+    try:
+        timeout_input = int(input("\nWhat do you want to set the request timeout to? \n(10 seconds is the default, however you may want to use a higher value if you have a slower network): "))
+        timeout = timeout_input if timeout_input > 0 else 10
+    except Exception:
+        print("Invalid input for timeout, defaulting to 10.")
+        timeout = 10
+
+    try:
+        prox_check_input = input("\nWould you like to check SOCKS4 proxies? (In BETA testing) (y/N): ").lower()
+        prox_check = prox_check_input == "y"
+    except Exception:
+        print("Invalid input for proxy check, defaulting to False.")
+        prox_check = False
+
 def intro(): 
     S = r"""
  ▄████████  ▄██████▄   ▄█          ▄████████ ███▄▄▄▄      ▄████████  ▄████████    ▄████████    ▄████████    ▄████████ 
@@ -30,24 +57,12 @@ def intro():
     print("<---------------------------------------------------------------------------------------------------------------------->")
 
 os.system('cls' if os.name == 'nt' else 'clear')
-global rand_UA
-global timeout
-global prox_check
-
-try:
-    intro()
-    rand_UA = input("Would you like to use random user agents? (Y/n): ")
-    rand_UA = rand_UA.lower() != "n"
-    timeout = int(input("\nWhat do you want to set the request timeout to? \n(10 seconds is the default, however you may want to use a higher value if you have a slower network): "))
-    prox_check = input("\nWould you like to check SOCKS4 proxies? (In BETA testing) (y/N): ").lower()
-    prox_check = prox_check == "y"
-except Exception:
-    rand_UA = True
-    timeout = 10
-    prox_check = False
 
 intro()
+parameters()
 import tqdm
+
+
 
 def proxy_sources():
     return {

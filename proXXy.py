@@ -38,6 +38,7 @@ def parameters():
     except Exception:
         print("Invalid input for proxy check, defaulting to False.")
         prox_check = False
+parameters()
 
 def intro(): 
     S = r"""
@@ -59,7 +60,6 @@ def intro():
 os.system('cls' if os.name == 'nt' else 'clear')
 
 intro()
-parameters()
 import tqdm
 
 

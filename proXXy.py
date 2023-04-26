@@ -18,7 +18,6 @@ def parameters():
     global prox_check
 
     try:
-        intro()
         rand_UA_input = input("Would you like to use random user agents? (Y/n): ")
         rand_UA = rand_UA_input.lower() != "n"
     except Exception:
@@ -38,7 +37,6 @@ def parameters():
     except Exception:
         print("Invalid input for proxy check, defaulting to False.")
         prox_check = False
-parameters()
 
 def intro(): 
     S = r"""
@@ -59,6 +57,8 @@ def intro():
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
+intro()
+parameters()
 intro()
 import tqdm
 

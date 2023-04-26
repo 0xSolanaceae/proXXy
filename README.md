@@ -23,7 +23,7 @@ The program will output three files in the project directory containing the regu
 
 ## Planned Features 
 `Proxy checking is in Beta Testing`
-- Implement a feature for automatically testing the scraped proxies to verify their functionality. (1/3rd completed, SOCKS4 currently functions perfectly) 
+- Implement a feature for automatically testing the scraped proxies to verify their functionality. (1/3rd completed) 
 - Proxy Sorting instead of hardcoding.
 - Provide an option to only write Elite, Anonymous, or Transparent proxies to lists.
 - Add support for HTTPS proxies.

@@ -1,12 +1,25 @@
-# ProXXy
+<a name="readme-top"></a>
 
-ProXXy is a tool for scraping and regularizing proxy lists. It can be used to collect and organize lists of HTTP, SOCKS4, and SOCKS5 proxies for use in web scraping, data mining, *simulated* DDoS attacks, and other tasks. Currently finds more than 100k proxies from ~100 different sources.
+<div align="center">
 
-This project is for educational purposes only— Please do not use this for illegal activities.
+  [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=200&size=98&duration=2000&pause=2000&color=831ACB&center=true&vCenter=true&width=1000&height=150&lines=%3C%7C---proXXy---%7C%3E)](https://git.io/typing-svg)
+
+  <!-- BANNER -->
+  <br />
+  
+ ---
+***proXXy*** is a powerful tool designed for acquiring and managing a vast quantity of proxies. Its primary purpose is to gather and organize HTTP, SOCKS4, and SOCKS5 proxies, making them ideal for various tasks, such as web scraping, data mining, DDoS attacks, and other similar activities. 
+
+The software is currently capable of retrieving over 100,000 proxies from approximately 100 different sources.
+
+  This project is for educational purposes only— Please do not use this for illegal activities.
+</div>
+
+---
 
 ## Installation
 
-To install ProXXy, follow these steps:
+To install proXXy, follow these steps:
 
 Clone the repository:
 ```

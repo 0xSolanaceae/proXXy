@@ -2,10 +2,9 @@
 #Coded by Solanaceae
 import os
 import re
-import socks
 import socket
 import random
-import asyncio
+import threading
 import requests
 import warnings
 import contextlib
@@ -18,25 +17,42 @@ def parameters():
     global prox_check
 
     try:
-        rand_UA_input = input("Would you like to use random user agents? (Y/n): ")
+        intro()
+        rand_UA_input = input("Would you like to use random user agents? (Y/n): ").lower()
+        if rand_UA_input == "":
+            raise Exception
         rand_UA = rand_UA_input.lower() != "n"
     except Exception:
-        print("Invalid input for random user agent, defaulting to True.")
         rand_UA = True
 
     try:
-        timeout_input = int(input("\nWhat do you want to set the request timeout to? \n(10 seconds is the default, however you may want to use a higher value if you have a slower network): "))
+        intro()
+        timeout_input = input("How long should the request timeout be? (Default is 10 seconds): ")
+        if timeout_input == "":
+            raise Exception
+        timeout_input = int(timeout_input)
         timeout = timeout_input if timeout_input > 0 else 10
     except Exception:
-        print("Invalid input for timeout, defaulting to 10.")
         timeout = 10
 
     try:
-        prox_check_input = input("\nWould you like to check SOCKS4 proxies? (In BETA testing) (y/N): ").lower()
-        prox_check = prox_check_input == "y"
+        intro()
+        prox_check_input = input("Would you like to check HTTP proxies? (Y/n): ").lower()
+        if prox_check_input == "":
+            raise Exception
+        prox_check = prox_check_input.lower() != "n"
     except Exception:
-        print("Invalid input for proxy check, defaulting to False.")
-        prox_check = False
+        prox_check = True
+
+
+    # Confirmation prompt
+    intro()
+    print(f"Selected options:\n\n -- Random user agents: {rand_UA}\n -- Timeout: {timeout}\n -- Proxy check: {prox_check}")
+    confirm_input = input("\nDo you want to continue with these options? (Y/n): ").lower()
+
+    # Check user's confirmation
+    if confirm_input == "n":
+        parameters()
 
 def intro(): 
     S = r"""
@@ -54,15 +70,6 @@ def intro():
     print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, S, 1)))
     print("")
     print("<---------------------------------------------------------------------------------------------------------------------->")
-
-os.system('cls' if os.name == 'nt' else 'clear')
-
-intro()
-parameters()
-intro()
-import tqdm
-
-
 
 def proxy_sources():
     return {
@@ -174,7 +181,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies/socks5.txt",
             "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies_anonymous/socks5.txt",
             "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/socks5.txt",
-            "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks4.txt", # good one
+            "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks5.txt", # good one
             "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/socks5.txt",
             "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks5.txt",
             "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks5.txt",
@@ -229,74 +236,59 @@ def regularize_proxies(protocol):
         print(f"Error: Could not write to {protocol}.txt")
         return
 
-def checking_handler(proxy_file, site, timeout, protocol, rand_UA):
+def checking_handler(site, timeout, protocol, rand_UA):
     if protocol == "HTTP":
-        return # temp response TODO
+        HTTP_check(site, timeout, rand_UA)
     elif protocol == "SOCKS4":
-        SOCKS4_check(proxy_file, site, timeout, rand_UA)
+        return # temp response TODO
     elif protocol == "SOCKS5":
         return # temp response TODO
 
-def SOCKS4_check(proxy_file, site, timeout, rand_UA):
-    # Set up the SOCKS4 proxy
-    def set_proxy(ip, port):
-        socks.set_default_proxy(socks.SOCKS4, ip, port)
-        socket.socket = socks.socksocket
+def HTTP_check(site, timeout, rand_UA):
+    import tqdm 
+    PROXY_LIST_FILE = 'HTTP.txt'
+    TEST_URL = site
+    TIMEOUT = timeout
 
-    # Read the user agents from the file
-    with open("user_agents.txt", "r") as f:
-        user_agents = [line.strip() for line in f.readlines()]
+    def test_proxy(proxy, results):
+        headers = {}
+        if rand_UA:
+            with open('user_agents.txt') as f:
+                user_agents = f.readlines()
+            headers['User-Agent'] = random.choice(user_agents).strip()
+        with contextlib.suppress(requests.exceptions.RequestException, socket.timeout):
+            response = requests.get(TEST_URL, proxies={'https': proxy}, headers=headers, timeout=TIMEOUT)
+            if response.status_code == 200:
+                results.append(proxy)
 
-    # Function to get a random user agent
-    def get_random_user_agent():
-        return random.choice(user_agents)
-
-    async def check_proxy(proxy, valid_proxies, rand_UA):
-        with contextlib.suppress(Exception):
-            ip, port = proxy.split(":")
-            set_proxy(ip, int(port))
-            
-            headers = {}
-            if rand_UA:
-                headers["User-Agent"] = get_random_user_agent()
-                
-            writer = await asyncio.open_connection(site, 80, limit=timeout)
-            writer.write(b"GET / HTTP/1.1\r\n")
-            for header, value in headers.items():
-                writer.write(f"{header}: {value}\r\n".encode("utf-8"))
-            writer.write(b"\r\n")
-            writer.close()
-            await writer.wait_closed()
-            valid_proxies.append(proxy)
-
-    # Read the proxy list from the file
-    with open(proxy_file, "r") as f:
+    proxies = []
+    valid_proxies = []
+    with open(PROXY_LIST_FILE, 'r') as f:
         proxies = [line.strip() for line in f.readlines()]
 
-    # Set up the event loop and run the checks
-    async def main():
-        valid_proxies = []
-        tasks = []
-        with tqdm.tqdm(total=len(proxies), desc="Checking SOCKS4", ascii=" #", unit="prox") as pbar:
-            for proxy in proxies:
-                task = asyncio.create_task(check_proxy(proxy, valid_proxies, rand_UA))
-                task.add_done_callback(lambda _: pbar.update())
-                tasks.append(task)
-            await asyncio.gather(*tasks)
+    threads = []
+    for proxy in tqdm.tqdm(proxies, desc="Checking proxies", ascii=" #"):
+        thread = threading.Thread(target=test_proxy, args=(proxy, valid_proxies), daemon=True)
+        threads.append(thread)
+        thread.start()
+    for thread in tqdm.tqdm(threads, desc="Joining threads", ascii=" #"):
+        thread.join()
 
-        percentage = len(valid_proxies) / len(proxies) * 100
-        print(f"Checked! {len(valid_proxies)} of {len(proxies)} ({percentage:.2f}%) SOCKS4 proxies are currently active.")
-        # Write the verified proxies back to the SOCKS4.txt file
-        with open(proxy_file, "w") as f:
-            f.write("\n".join(valid_proxies))
+    with open(PROXY_LIST_FILE, 'w') as f:
+        for proxy in valid_proxies:
+            f.write(proxy + '\n')
 
-    asyncio.run(main())
+    percentage = len(valid_proxies) / len(proxies) * 100
+    print(f"All done! {len(valid_proxies)} of {len(proxies)} ({percentage:.2f}%) HTTP proxies are currently active.")
 
+def SOCKS4_check():
+    pass
 
-def SOCKS5_check(proxy_file, site, timeout):
+def SOCKS5_check():
     pass
 
 def init_main(error_log, site, timeout):
+    import tqdm
     # proxy sources
     proxies = proxy_sources()
 
@@ -339,15 +331,24 @@ def init_main(error_log, site, timeout):
 
     if prox_check == True:
         for protocol in protocols:
-            checking_handler(f"{protocol}.txt", site, timeout, protocol, rand_UA)
+            checking_handler(site, timeout, protocol, rand_UA)
     print("<---------------------------------------------------------------------------------------------------------------------->")
 
 def main():
-    warnings.filterwarnings("ignore", category=UserWarning, message=".*looks like you're parsing an XML document using an HTML parser.*")
-    site = "www.icanhazip.com"
-    # initialize files
-    with (open("HTTP.txt", "w"), open("SOCKS4.txt", "w"), open("SOCKS5.txt", "w"), open("error.log", "w") as error_log):
-        init_main(error_log, site, timeout)
+    try:
+        parameters()
+        intro()
+        warnings.filterwarnings("ignore", category=UserWarning, message=".*looks like you're parsing an XML document using an HTML parser.*")
+        site = "http://httpbin.org/ip"
+        # initialize files
+        with (open("HTTP.txt", "w"), open("SOCKS4.txt", "w"), open("SOCKS5.txt", "w"), open("error.log", "w") as error_log):
+            init_main(error_log, site, timeout)
+    except KeyboardInterrupt:
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("<---------------------------------------------------------------------------------------------------------------------->")
+        print("Thank you for using proXXy.")
+        print("<---------------------------------------------------------------------------------------------------------------------->")
+        exit()
         
 if __name__ == '__main__':
     main()

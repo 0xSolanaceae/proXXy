@@ -16,14 +16,15 @@ def parameters():
     global timeout
     global prox_check
 
-    try:
+    rand_UA = False
+    '''try:
         intro()
         rand_UA_input = input("Would you like to use random user agents? (Y/n): ").lower()
         if rand_UA_input == "":
             raise Exception
         rand_UA = rand_UA_input.lower() != "n"
     except Exception:
-        rand_UA = True
+        rand_UA = True'''
 
     try:
         intro()

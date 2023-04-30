@@ -10,7 +10,7 @@
  ---
 ***proXXy*** is a powerful tool designed for acquiring and managing a vast quantity of proxies. Its primary purpose is to gather and organize HTTP, SOCKS4, and SOCKS5 proxies, making them ideal for various tasks, such as web scraping, web penetration testing, censorship bypassing, DDoSing, and other similar activities. 
 
-The software is currently capable of retrieving over 100,000 proxies from approximately 100 different sources.
+The software is currently capable of retrieving over 80,000 proxies from approximately 100 different sources.
 
   This project is for educational purposes only— Please do not use this for illegal activities.
 </div>

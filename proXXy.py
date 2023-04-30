@@ -260,11 +260,11 @@ def HTTP_check(site, timeout, rand_UA):
         proxies = [line.strip() for line in f.readlines()]
 
     threads = []
-    for proxy in tqdm.tqdm(proxies, desc="Checking proxies", ascii=" #"):
+    for proxy in tqdm.tqdm(proxies, desc="Checking proxies", ascii=" #", unit= " prox"):
         thread = threading.Thread(target=test_proxy, args=(proxy, valid_proxies), daemon=True)
         threads.append(thread)
         thread.start()
-    for thread in tqdm.tqdm(threads, desc="Joining threads", ascii=" #"):
+    for thread in tqdm.tqdm(threads, desc="Joining threads", ascii=" #", unit= " prox"):
         thread.join()
 
     with open(PROXY_LIST_FILE, 'w') as f:

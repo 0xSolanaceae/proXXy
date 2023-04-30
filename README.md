@@ -64,5 +64,5 @@ The program will output three files in the project directory containing the regu
 
 This project is licensed under the MIT License. See the `LICENSE` file for more information.
 
-![img](https://user-images.githubusercontent.com/89823371/231321673-0b8312c7-0cb2-4ca9-af42-bddf706fa1af.png)
+![img](https://user-images.githubusercontent.com/89823371/235329804-79367e5d-ef08-493e-9e4b-de9a51a5b503.png)
 

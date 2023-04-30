@@ -197,7 +197,7 @@ def proxy_sources():
 def remove_duplicate_proxies(protocol):
     # Read in the text document
     try:
-        with open(f'{protocol}.txt', 'r') as file:
+        with open(f'scraped/{protocol}.txt', 'r') as file:
             proxies_data = file.read()
     except IOError:
         print(f"Error: Could not read {protocol}.txt")
@@ -209,7 +209,7 @@ def remove_duplicate_proxies(protocol):
 
     # Overwrite the original text document with the unique proxies
     try:
-        with open(f'{protocol}.txt', 'w') as file:
+        with open(f'scraped/{protocol}.txt', 'w') as file:
             for proxy in unique_proxies:
                 file.write(proxy + '\n')
     except IOError:
@@ -218,7 +218,7 @@ def remove_duplicate_proxies(protocol):
     
 def regularize_proxies(protocol):
     try:
-        with open(f'{protocol}.txt', 'r') as file:
+        with open(f'scraped/{protocol}.txt', 'r') as file:
             text_data = file.read()
     except IOError:
         print(f"Error: Could not read {protocol}.txt")
@@ -230,7 +230,7 @@ def regularize_proxies(protocol):
 
     # Overwrite the original text document with the regularized proxies
     try:
-        with open(f'{protocol}.txt', 'w') as file:
+        with open(f'scraped/{protocol}.txt', 'w') as file:
             for proxy in proxies:
                 file.write(proxy + '\n')
     except IOError:
@@ -245,7 +245,7 @@ def checking_handler(site, timeout, protocol, rand_UA):
 
 def HTTP_check(site, timeout, rand_UA):
     import tqdm
-    PROXY_LIST_FILE = 'HTTP.txt'
+    PROXY_LIST_FILE = 'scraped/HTTP.txt'
     TEST_URL = site
     TIMEOUT = timeout
     def test_proxy(proxy, results):
@@ -297,13 +297,13 @@ def scraping_handler(error_log, site, timeout):
                     soup = BeautifulSoup(response.content, 'html.parser')
                     scraped_data = soup.get_text()
                     if proxy_type == "HTTP":
-                        with open("HTTP.txt", "a") as file_http:
+                        with open("scraped/HTTP.txt", "a") as file_http:
                             file_http.write(scraped_data + '\n')
                     elif proxy_type == "SOCKS4":
-                        with open("SOCKS4.txt", "a") as file_socks4:
+                        with open("scraped/SOCKS4.txt", "a") as file_socks4:
                             file_socks4.write(scraped_data + '\n')
                     elif proxy_type == "SOCKS5":
-                        with open("SOCKS5.txt", "a") as file_socks5:
+                        with open("scraped/SOCKS5.txt", "a") as file_socks5:
                             file_socks5.write(scraped_data + '\n')
                     accessed_links += 1
                 else:
@@ -344,7 +344,7 @@ def main():
         warnings.filterwarnings("ignore", category=UserWarning, message=".*looks like you're parsing an XML document using an HTML parser.*")
         site = "http://httpbin.org/ip"
         # initialize files
-        with (open("HTTP.txt", "w"), open("SOCKS4.txt", "w"), open("SOCKS5.txt", "w"), open("error.log", "w") as error_log):
+        with open("scraped/HTTP.txt", "w"), open("scraped/SOCKS4.txt", "w"), open("scraped/SOCKS5.txt", "w"), open("error.log", "w") as error_log:
             init_main(error_log, site, timeout)
     except KeyboardInterrupt:
         os.system('cls' if os.name == 'nt' else 'clear')

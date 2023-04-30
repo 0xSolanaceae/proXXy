@@ -41,18 +41,19 @@ pip3 install -r requirements.txt
 python3 proXXy.py
 ```
 3. Select the execution parameters.
-4. Allow the program to complete, then check the new text files!
+4. Allow the program to complete, then check the new text files located in 'scraped/' directory!
 
 The program will output three files in the project directory containing the regularized proxy lists: `HTTP.txt`, `SOCKS4.txt`, and `SOCKS5.txt`, along with an error logging file named `error.log` to assist you in debugging.
 
 ## Planned Features 
-`Proxy checking is in Beta Testing`
 - Implement a feature for automatically testing the scraped proxies to verify their functionality. (1/3rd completed) 
-- Proxy Sorting instead of hardcoding.
+- Proxy sorting instead of hardcoding.
 - Provide an option to discern between Elite, Anonymous, and Transparent anonymity classes of proxies.
 - Add support for HTTPS proxies.
 
 ## Added Features
+- Added output folder for brevity.
+- Added more user parameters.
 - Added option to choose random user agents with every proxy request.
 - Verified proxies are written to checked file.
 - Improve error handling and logging for more informative feedback to the user.

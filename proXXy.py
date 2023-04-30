@@ -240,25 +240,17 @@ def regularize_proxies(protocol):
 def checking_handler(site, timeout, protocol, rand_UA):
     if protocol == "HTTP":
         HTTP_check(site, timeout, rand_UA)
-    elif protocol == "SOCKS4":
-        return # temp response TODO
-    elif protocol == "SOCKS5":
+    elif protocol in ["SOCKS4", "SOCKS5"]:
         return # temp response TODO
 
 def HTTP_check(site, timeout, rand_UA):
-    import tqdm 
+    import tqdm
     PROXY_LIST_FILE = 'HTTP.txt'
     TEST_URL = site
     TIMEOUT = timeout
-
     def test_proxy(proxy, results):
-        headers = {}
-        if rand_UA:
-            with open('user_agents.txt') as f:
-                user_agents = f.readlines()
-            headers['User-Agent'] = random.choice(user_agents).strip()
         with contextlib.suppress(requests.exceptions.RequestException, socket.timeout):
-            response = requests.get(TEST_URL, proxies={'https': proxy}, headers=headers, timeout=TIMEOUT)
+            response = requests.get(TEST_URL, proxies={'http': proxy}, timeout=TIMEOUT)
             if response.status_code == 200:
                 results.append(proxy)
 
@@ -288,7 +280,7 @@ def SOCKS4_check():
 def SOCKS5_check():
     pass
 
-def init_main(error_log, site, timeout):
+def scraping_handler(error_log, site, timeout):
     import tqdm
     # proxy sources
     proxies = proxy_sources()
@@ -329,11 +321,21 @@ def init_main(error_log, site, timeout):
     for protocol in tqdm.tqdm(protocols, desc="Removing Duplicates", ascii=" #", unit= " prox"):
         remove_duplicate_proxies(protocol)
     print("")
-
+    
     if prox_check == True:
         for protocol in protocols:
             checking_handler(site, timeout, protocol, rand_UA)
     print("<---------------------------------------------------------------------------------------------------------------------->")
+
+def init_main(error_log, site, timeout):
+    try: 
+        scraping_handler(error_log, site, timeout)
+    except KeyboardInterrupt:
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("<---------------------------------------------------------------------------------------------------------------------->")
+        print("Thank you for using proXXy.")
+        print("<---------------------------------------------------------------------------------------------------------------------->")
+        exit()
 
 def main():
     try:

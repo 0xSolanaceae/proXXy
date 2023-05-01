@@ -70,7 +70,7 @@ def intro():
     os.system('cls' if os.name == 'nt' else 'clear')
     print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, S, 1)))
     print("")
-    print("<---------------------------------------------------------------------------------------------------------------------->")
+    print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
 
 def proxy_sources():
     return {
@@ -264,6 +264,7 @@ def HTTP_check(site, timeout, rand_UA):
         thread = threading.Thread(target=test_proxy, args=(proxy, valid_proxies), daemon=True)
         threads.append(thread)
         thread.start()
+
     for thread in tqdm.tqdm(threads, desc="Joining threads", ascii=" #", unit= " prox"):
         thread.join()
 
@@ -315,6 +316,12 @@ def scraping_handler(error_log, site, timeout):
     print(f"Total Links: {total_links} || Accessed Links: {accessed_links}")
     print("")
 
+    if accessed_links == 0:
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
+        print("\n                     A network error occured, please ensure your device is connected to the internet                \n")
+        exit_con()
+
     protocols = ["HTTP", "SOCKS4", "SOCKS5"]
     for protocol in tqdm.tqdm(protocols, desc="Regularizing Proxies", ascii=" #", unit= " prox"):
         regularize_proxies(protocol)
@@ -325,17 +332,20 @@ def scraping_handler(error_log, site, timeout):
     if prox_check == True:
         for protocol in protocols:
             checking_handler(site, timeout, protocol, rand_UA)
-    print("<---------------------------------------------------------------------------------------------------------------------->")
+    print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
 
 def init_main(error_log, site, timeout):
     try: 
         scraping_handler(error_log, site, timeout)
     except KeyboardInterrupt:
         os.system('cls' if os.name == 'nt' else 'clear')
-        print("<---------------------------------------------------------------------------------------------------------------------->")
-        print("Thank you for using proXXy.")
-        print("<---------------------------------------------------------------------------------------------------------------------->")
-        exit()
+        exit_con()
+
+def exit_con():
+    print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
+    print("                                     ||     Thank you for using proXXy.     ||                                          ")
+    print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
+    exit()
 
 def main():
     try:
@@ -348,10 +358,7 @@ def main():
             init_main(error_log, site, timeout)
     except KeyboardInterrupt:
         os.system('cls' if os.name == 'nt' else 'clear')
-        print("<---------------------------------------------------------------------------------------------------------------------->")
-        print("Thank you for using proXXy.")
-        print("<---------------------------------------------------------------------------------------------------------------------->")
-        exit()
+        exit_con()
         
 if __name__ == '__main__':
     main()

@@ -57,7 +57,7 @@ def parameters():
 
 def intro(): 
     S = r"""
- ▄████████  ▄██████▄   ▄█          ▄████████ ███▄▄▄▄      ▄████████  ▄████████    ▄████████    ▄████████    ▄████████ 
+ ▄████████   ▄██████▄   ▄█          ▄████████  ███▄▄▄▄      ▄████████  ▄████████    ▄████████    ▄████████    ▄████████ 
   ███    ███ ███    ███ ███         ███    ███ ███▀▀▀██▄   ███    ███ ███    ███   ███    ███   ███    ███   ███    ███ 
   ███    █▀  ███    ███ ███         ███    ███ ███   ███   ███    ███ ███    █▀    ███    █▀    ███    ███   ███    █▀  
   ███        ███    ███ ███         ███    ███ ███   ███   ███    ███ ███         ▄███▄▄▄       ███    ███  ▄███▄▄▄     
@@ -260,7 +260,7 @@ def HTTP_check(site, timeout, rand_UA):
         proxies = [line.strip() for line in f.readlines()]
 
     threads = []
-    for proxy in tqdm.tqdm(proxies, desc="Checking proxies", ascii=" #", unit= " prox"):
+    for proxy in tqdm.tqdm(proxies, desc="Checking HTTP proxies", ascii=" #", unit= " prox"):
         thread = threading.Thread(target=test_proxy, args=(proxy, valid_proxies), daemon=True)
         threads.append(thread)
         thread.start()

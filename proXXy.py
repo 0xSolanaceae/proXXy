@@ -16,6 +16,7 @@ def parameters():
     global timeout
     global prox_check
 
+
     rand_UA = False
     '''try:
         intro()
@@ -194,6 +195,10 @@ def proxy_sources():
         #]
     }
 
+
+## proxy processing
+
+
 def remove_duplicate_proxies(protocol):
     # Read in the text document
     try:
@@ -234,14 +239,12 @@ def regularize_proxies(protocol):
             for proxy in proxies:
                 file.write(proxy + '\n')
     except IOError:
-        print(f"Error: Could not write to {protocol}.txt")
-        return
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
+        print(f"\n                                           Error: Could not write to {protocol}.txt                                \n")
+        exit_con()
 
-def checking_handler(site, timeout, protocol, rand_UA):
-    if protocol == "HTTP":
-        HTTP_check(site, timeout, rand_UA)
-    elif protocol in ["SOCKS4", "SOCKS5"]:
-        return # temp response TODO
+## checking portion
 
 def HTTP_check(site, timeout, rand_UA):
     import tqdm
@@ -275,10 +278,10 @@ def HTTP_check(site, timeout, rand_UA):
     percentage = len(valid_proxies) / len(proxies) * 100
     print(f"All done! {len(valid_proxies)} of {len(proxies)} ({percentage:.2f}%) HTTP proxies are currently active.")
 
-def SOCKS4_check():
+def SOCKS4_check(site, timeout, rand_UA):
     pass
 
-def SOCKS5_check():
+def SOCKS5_check(site, timeout, rand_UA):
     pass
 
 def scraping_handler(error_log, site, timeout):
@@ -334,18 +337,27 @@ def scraping_handler(error_log, site, timeout):
             checking_handler(site, timeout, protocol, rand_UA)
     print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
 
+def exit_con():
+    print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
+    print("                                     ||     Thank you for using proXXy.     ||                                          ")
+    print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
+    exit()
+
+def checking_handler(site, timeout, protocol, rand_UA):
+    if protocol == "HTTP":
+        HTTP_check(site, timeout, rand_UA)
+    elif protocol == "SOCKS4":
+        SOCKS4_check(site, timeout, rand_UA)
+    elif protocol == "SOCKS5":
+        SOCKS5_check(site, timeout, rand_UA)
+
+
 def init_main(error_log, site, timeout):
     try: 
         scraping_handler(error_log, site, timeout)
     except KeyboardInterrupt:
         os.system('cls' if os.name == 'nt' else 'clear')
         exit_con()
-
-def exit_con():
-    print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
-    print("                                     ||     Thank you for using proXXy.     ||                                          ")
-    print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
-    exit()
 
 def main():
     try:

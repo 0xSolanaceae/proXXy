@@ -268,7 +268,7 @@ def HTTP_check(site, timeout, rand_UA):
         threads.append(thread)
         thread.start()
 
-    for thread in tqdm.tqdm(threads, desc="Joining threads", ascii=" #", unit= " prox"):
+    for thread in tqdm.tqdm(threads, desc="Joining threads", ascii=" #", unit= " thr"):
         thread.join()
 
     with open(PROXY_LIST_FILE, 'w') as f:
@@ -289,8 +289,8 @@ def scraping_handler(error_log, site, timeout):
     # proxy sources
     proxies = proxy_sources()
 
-    total_links = 0
-    accessed_links = 0
+    total_sources = 0
+    accessed_sources = 0
 
     # webscraping proxies
     for proxy_type, urls in proxies.items():
@@ -309,17 +309,17 @@ def scraping_handler(error_log, site, timeout):
                     elif proxy_type == "SOCKS5":
                         with open("scraped/SOCKS5.txt", "a") as file_socks5:
                             file_socks5.write(scraped_data + '\n')
-                    accessed_links += 1
+                    accessed_sources += 1
                 else:
                     error_log.write(f"Could not access: {url}\n")
-            total_links += 1
+            total_sources += 1
 
+    percentage = accessed_sources / total_sources * 100
+    print(f"\nTotal Sources: {total_sources} || Accessed Sources: {accessed_sources} || ({percentage:.2f}%)\n")
 
-    print("")
-    print(f"Total Links: {total_links} || Accessed Links: {accessed_links}")
-    print("")
-
-    if accessed_links == 0:
+    if accessed_sources < total_sources:
+        print("Some sources may be blocked, please ensure your network connection is not censored\n")
+    elif accessed_sources == 0:
         os.system('cls' if os.name == 'nt' else 'clear')
         print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
         print("\n                     A network error occured, please ensure your device is connected to the internet                \n")
@@ -345,11 +345,20 @@ def exit_con():
 
 def checking_handler(site, timeout, protocol, rand_UA):
     if protocol == "HTTP":
-        HTTP_check(site, timeout, rand_UA)
+        try:
+            HTTP_check(site, timeout, rand_UA)
+        except Exception:
+            exit_con()
     elif protocol == "SOCKS4":
-        SOCKS4_check(site, timeout, rand_UA)
+        try:
+            SOCKS4_check(site, timeout, rand_UA)
+        except Exception:
+            exit_con()
     elif protocol == "SOCKS5":
-        SOCKS5_check(site, timeout, rand_UA)
+        try:
+            SOCKS5_check(site, timeout, rand_UA)
+        except Exception:
+            exit_con()
 
 
 def init_main(error_log, site, timeout):

@@ -2,7 +2,7 @@
 
 <div align="center">
 
-  [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=200&size=98&duration=2000&pause=2000&color=831ACB&center=true&vCenter=true&width=1000&height=150&lines=—————proXXy—————)](https://git.io/typing-svg)
+  [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=200&size=98&duration=2000&pause=2000&color=831ACB&center=true&vCenter=true&width=1000&height=150&lines=————proXXy————)](https://git.io/typing-svg)
 
   <!-- BANNER -->
   <br />
@@ -41,7 +41,7 @@ pip3 install -r requirements.txt
 python3 proXXy.py
 ```
 3. Select the execution parameters.
-4. Allow the program to complete, then check the new text files located in 'scraped/' directory!
+4. Allow the program to complete, then check the new text files located in `scraped/` directory!
 
 The program will output three files in the project directory containing the regularized proxy lists: `HTTP.txt`, `SOCKS4.txt`, and `SOCKS5.txt`, along with an error logging file named `error.log` to assist you in debugging.
 

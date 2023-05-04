@@ -2,7 +2,7 @@
 
 <div align="center">
 
-  [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=200&size=98&duration=2000&pause=2000&color=831ACB&center=true&vCenter=true&width=1000&height=150&lines=%3C%7C———proXXy———%7C%3E)](https://git.io/typing-svg)
+  [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=200&size=98&duration=2000&pause=2000&color=831ACB&center=true&vCenter=true&width=1000&height=150&lines=—————proXXy—————)](https://git.io/typing-svg)
 
   <!-- BANNER -->
   <br />

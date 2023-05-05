@@ -8,7 +8,7 @@
   <br />
   
  ---
-***proXXy*** is a powerful tool designed for acquiring and managing a vast quantity of proxies. Its primary purpose is to gather and organize HTTP, SOCKS4, and SOCKS5 proxies, making them ideal for various tasks, such as web scraping, web penetration testing, censorship bypassing, DDoSing, and other similar activities. 
+***proXXy*** is a powerful tool designed for acquiring and managing a vast quantity of proxies. Its primary purpose is to gather, organize, and provide HTTP, SOCKS4, and SOCKS5 proxies. You can use them to do web scraping, penetration testing, bypassing censorship, simulated DDoS attacks, and more!
 
 The software is currently capable of retrieving over 80,000 proxies from approximately 100 different sources.
 
@@ -43,9 +43,10 @@ python3 proXXy.py
 3. Select the execution parameters.
 4. Allow the program to complete, then check the new text files located in `scraped/` directory!
 
-The program will output three files in the project directory containing the regularized proxy lists: `HTTP.txt`, `SOCKS4.txt`, and `SOCKS5.txt`, along with an error logging file named `error.log` to assist you in debugging.
+The program will output three files in the project directory containing the regularized proxy lists: `HTTP.txt`, `SOCKS4.txt`, and `SOCKS5.txt`, along with an error output file titled `error.log` noting the links that were unable to be accessed.
 
 ## Planned Features 
+- Fix using random user agents. (Currently breaks the testing)
 - Implement a feature for automatically testing the scraped proxies to verify their functionality. (1/3rd completed) 
 - Proxy sorting instead of hardcoding.
 - Provide an option to discern between Elite, Anonymous, and Transparent anonymity classes of proxies.
@@ -54,7 +55,6 @@ The program will output three files in the project directory containing the regu
 ## Added Features
 - Added output folder for brevity.
 - Added more user parameters.
-- Added option to choose random user agents with every proxy request.
 - Verified proxies are written to checked file.
 - Improve error handling and logging for more informative feedback to the user.
 - Added a function to remove duplicate proxies from the generated lists.
@@ -65,5 +65,4 @@ The program will output three files in the project directory containing the regu
 
 This project is licensed under the MIT License. See the `LICENSE` file for more information.
 
-![img](https://user-images.githubusercontent.com/89823371/235329804-79367e5d-ef08-493e-9e4b-de9a51a5b503.png)
-
+![img](https://user-images.githubusercontent.com/89823371/236451862-0060cf19-ed95-45d2-ad9b-0964545a3b26.png)

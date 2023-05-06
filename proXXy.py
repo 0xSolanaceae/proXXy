@@ -15,17 +15,16 @@ def parameters():
     global rand_UA
     global timeout
     global prox_check
+    global user_agents
 
-
-    rand_UA = False
-    '''try:
+    try:
         intro()
         rand_UA_input = input("Would you like to use random user agents? (Y/n): ").lower()
         if rand_UA_input == "":
             raise Exception
         rand_UA = rand_UA_input.lower() != "n"
     except Exception:
-        rand_UA = True'''
+        rand_UA = True
 
     try:
         intro()
@@ -46,6 +45,10 @@ def parameters():
     except Exception:
         prox_check = True
 
+    if rand_UA:
+        user_agents = []
+        with open("user_agents.txt", "r") as file:
+            user_agents = file.read().splitlines()
 
     # Confirmation prompt
     intro()
@@ -71,7 +74,6 @@ def intro():
     os.system('cls' if os.name == 'nt' else 'clear')
     print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, S, 1)))
     print("")
-    print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
 
 def proxy_sources():
     return {
@@ -248,12 +250,20 @@ def regularize_proxies(protocol):
 
 def HTTP_check(site, timeout, rand_UA):
     import tqdm
+
     PROXY_LIST_FILE = 'scraped/HTTP.txt'
     TEST_URL = site
     TIMEOUT = timeout
+
     def test_proxy(proxy, results):
         with contextlib.suppress(requests.exceptions.RequestException, socket.timeout):
-            response = requests.get(TEST_URL, proxies={'http': proxy}, timeout=TIMEOUT)
+            headers = {}
+            if rand_UA:
+                headers['User-Agent'] = random.choice(user_agents)
+            else:
+                headers['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/37.0.2062.94 Chrome/37.0.2062.94 Safari/537.36'
+
+            response = requests.get(TEST_URL, proxies={'http': proxy}, headers=headers, timeout=TIMEOUT)
             if response.status_code == 200:
                 results.append(proxy)
 
@@ -284,35 +294,51 @@ def SOCKS4_check(site, timeout, rand_UA):
 def SOCKS5_check(site, timeout, rand_UA):
     pass
 
+def scrape_url(url, proxy_type, error_log):
+    with contextlib.suppress(requests.exceptions.RequestException):
+        response = requests.get(url)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.content, 'html.parser')
+            scraped_data = soup.get_text()
+            if proxy_type == "HTTP":
+                with open("scraped/HTTP.txt", "a") as file_http:
+                    file_http.write(scraped_data + '\n')
+            elif proxy_type == "SOCKS4":
+                with open("scraped/SOCKS4.txt", "a") as file_socks4:
+                    file_socks4.write(scraped_data + '\n')
+            elif proxy_type == "SOCKS5":
+                with open("scraped/SOCKS5.txt", "a") as file_socks5:
+                    file_socks5.write(scraped_data + '\n')
+        else:
+            error_log.write(f"Could not access: {url}\n")
+
 def scraping_handler(error_log, site, timeout):
     import tqdm
+
+    print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
+
     # proxy sources
     proxies = proxy_sources()
 
     total_sources = 0
     accessed_sources = 0
 
+    threads = []
+    lock = threading.Lock()
+
     # webscraping proxies
     for proxy_type, urls in proxies.items():
-        for url in tqdm.tqdm(urls, desc=f"Scraping {proxy_type}", ascii=" #", unit= " src"):
-            with contextlib.suppress(requests.exceptions.RequestException):
-                response = requests.get(url)
-                if response.status_code == 200:
-                    soup = BeautifulSoup(response.content, 'html.parser')
-                    scraped_data = soup.get_text()
-                    if proxy_type == "HTTP":
-                        with open("scraped/HTTP.txt", "a") as file_http:
-                            file_http.write(scraped_data + '\n')
-                    elif proxy_type == "SOCKS4":
-                        with open("scraped/SOCKS4.txt", "a") as file_socks4:
-                            file_socks4.write(scraped_data + '\n')
-                    elif proxy_type == "SOCKS5":
-                        with open("scraped/SOCKS5.txt", "a") as file_socks5:
-                            file_socks5.write(scraped_data + '\n')
-                    accessed_sources += 1
-                else:
-                    error_log.write(f"Could not access: {url}\n")
+        for url in tqdm.tqdm(urls, desc=f"Scraping {proxy_type}", ascii=" #", unit=" src"):
+            thread = threading.Thread(target=scrape_url, args=(url, proxy_type, error_log))
+            thread.start()
+            threads.append(thread)
+
             total_sources += 1
+
+    # Wait for all threads to finish
+    for thread in threads:
+        thread.join()
+        accessed_sources += 1
 
     percentage = accessed_sources / total_sources * 100
     print(f"\nTotal Sources: {total_sources} || Accessed Sources: {accessed_sources} || ({percentage:.2f}%)\n")
@@ -332,7 +358,7 @@ def scraping_handler(error_log, site, timeout):
         remove_duplicate_proxies(protocol)
     print("")
     
-    if prox_check == True:
+    if prox_check:
         for protocol in protocols:
             checking_handler(site, timeout, protocol, rand_UA)
     print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")

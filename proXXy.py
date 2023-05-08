@@ -8,6 +8,9 @@ import threading
 import requests
 import warnings
 import contextlib
+import platform
+import argparse
+import subprocess
 from bs4 import BeautifulSoup
 from pystyle import *
 
@@ -60,7 +63,7 @@ def parameters():
         parameters()
 
 def intro(): 
-    S = r"""
+    banner = r"""
  ▄████████   ▄██████▄   ▄█          ▄████████  ███▄▄▄▄      ▄████████  ▄████████    ▄████████    ▄████████    ▄████████ 
   ███    ███ ███    ███ ███         ███    ███ ███▀▀▀██▄   ███    ███ ███    ███   ███    ███   ███    ███   ███    ███ 
   ███    █▀  ███    ███ ███         ███    ███ ███   ███   ███    ███ ███    █▀    ███    █▀    ███    ███   ███    █▀  
@@ -72,7 +75,7 @@ def intro():
 
     os.system("title proXXy -- by Solanaceae")
     os.system('cls' if os.name == 'nt' else 'clear')
-    print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, S, 1)))
+    print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, banner, 1)))
     print("")
 
 def proxy_sources():
@@ -386,7 +389,6 @@ def checking_handler(site, timeout, protocol, rand_UA):
         except Exception:
             exit_con()
 
-
 def init_main(error_log, site, timeout):
     try: 
         scraping_handler(error_log, site, timeout)
@@ -406,6 +408,27 @@ def main():
     except KeyboardInterrupt:
         os.system('cls' if os.name == 'nt' else 'clear')
         exit_con()
-        
+
+def run_update_script():
+    current_os = platform.system()
+    if current_os == 'Linux':
+        # Change the permissions of the update script to make it executable
+        subprocess.run(['chmod', '+x', 'update.sh'])
+        # Run the update script
+        subprocess.run(['./update.sh'])
+        exit_con()
+    elif current_os == 'Windows':
+        # Run the update batch script
+        subprocess.run(['update.bat'])
+        exit_con()
+    else:
+        print('Unsupported operating system.')
+
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-u', action='store_true', help='Run update script')
+    args = parser.parse_args()
+
+    if args.u:
+        run_update_script()
     main()

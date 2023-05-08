@@ -14,7 +14,9 @@ if exist "proXXy" (
     echo Updating existing repository...
     cd proXXy || exit /b
     git pull origin master
+    
 ) else (
+
     echo Cloning repository...
     git clone %REPO_URL% proXXy
     cd proXXy || exit /b

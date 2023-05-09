@@ -23,15 +23,6 @@ def parameters():
 
     try:
         intro()
-        rand_UA_input = input("Would you like to use random user agents? (Y/n): ").lower()
-        if rand_UA_input == "":
-            raise Exception
-        rand_UA = rand_UA_input.lower() != "n"
-    except Exception:
-        rand_UA = True
-
-    try:
-        intro()
         prox_check_input = input("Would you like to check HTTP proxies? (Y/n): ").lower()
         if prox_check_input == "":
             raise Exception
@@ -42,15 +33,25 @@ def parameters():
     if prox_check:
         try:
             intro()
-            timeout_input = input("How long should the request timeout be? (Default is 10 seconds): ")
+            rand_UA_input = input("Would you like to use random user agents? (Y/n): ").lower()
+            if rand_UA_input == "":
+                raise Exception
+            rand_UA = rand_UA_input.lower() != "n"
+        except Exception:
+            rand_UA = True
+
+        try:
+            intro()
+            timeout_input = input("How long should the request timeout be? (Default is 10 seconds, cannot be lower than 5): ")
             if timeout_input == "":
                 raise Exception
             timeout_input = int(timeout_input)
-            timeout = timeout_input if timeout_input > 0 else 10
+            timeout = timeout_input if timeout_input >= 5 else 10
         except Exception:
             timeout = 10
     else:
         timeout = None
+        rand_UA = None
 
     if rand_UA:
         user_agents = []
@@ -59,10 +60,12 @@ def parameters():
 
     # Confirmation prompt
     intro()
-    print(f"Selected options:\n\n -- Random user agents: {rand_UA}\n -- Proxy check: {prox_check}")
+    print(f"Selected options:\n\n -- Proxy check: {prox_check}")
+    if rand_UA is not None:
+        print(f" -- Random user agents: {rand_UA}")
     if timeout is not None:
         print(f" -- Timeout: {timeout}")
-    confirm_input = input("\nDo you want to continue with these options? (Y/n): ").lower()
+    confirm_input = input("\nDo you want to continue? (Y/n): ").lower()
 
     # Check user's confirmation
     if confirm_input == "n":
@@ -360,7 +363,7 @@ def scraping_handler(error_log, site, timeout):
             threads.append(thread)
 
     # Wait for all threads to finish
-    for thread in threads:
+    for thread in tqdm.tqdm(threads, desc="Joining threads", ascii=" #", unit= " thr"):
         thread.join()
 
     if accessed_sources == 0:
@@ -390,7 +393,6 @@ def exit_con():
     print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
     print("                                     ||     Thank you for using proXXy.     ||                                          ")
     print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
-    print("")
     exit()
 
 def checking_handler(site, timeout, protocol, rand_UA):

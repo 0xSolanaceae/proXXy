@@ -4,12 +4,12 @@ import os
 import re
 import socket
 import random
-import threading
 import requests
 import warnings
-import contextlib
 import platform
 import argparse
+import threading
+import contextlib
 import subprocess
 from bs4 import BeautifulSoup
 from pystyle import *
@@ -31,6 +31,15 @@ def parameters():
 
     try:
         intro()
+        prox_check_input = input("Would you like to check HTTP proxies? (Y/n): ").lower()
+        if prox_check_input == "":
+            raise Exception
+        prox_check = prox_check_input.lower() != "n"
+    except Exception:
+        prox_check = True
+
+    try:
+        intro()
         timeout_input = input("How long should the request timeout be? (Default is 10 seconds): ")
         if timeout_input == "":
             raise Exception
@@ -38,15 +47,6 @@ def parameters():
         timeout = timeout_input if timeout_input > 0 else 10
     except Exception:
         timeout = 10
-
-    try:
-        intro()
-        prox_check_input = input("Would you like to check HTTP proxies? (Y/n): ").lower()
-        if prox_check_input == "":
-            raise Exception
-        prox_check = prox_check_input.lower() != "n"
-    except Exception:
-        prox_check = True
 
     if rand_UA:
         user_agents = []
@@ -230,6 +230,7 @@ def regularize_proxies(protocol):
     try:
         with open(f'scraped/{protocol}.txt', 'r') as file:
             text_data = file.read()
+            lines = file.readlines()
     except IOError:
         print(f"Error: Could not read {protocol}.txt")
         return
@@ -241,8 +242,10 @@ def regularize_proxies(protocol):
     # Overwrite the original text document with the regularized proxies
     try:
         with open(f'scraped/{protocol}.txt', 'w') as file:
+            file.write('\n'.join(lines)) #remove empty lines
             for proxy in proxies:
                 file.write(proxy + '\n')
+
     except IOError:
         os.system('cls' if os.name == 'nt' else 'clear')
         print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
@@ -253,7 +256,7 @@ def regularize_proxies(protocol):
 
 def HTTP_check(site, timeout, rand_UA):
     import tqdm
-
+    
     PROXY_LIST_FILE = 'scraped/HTTP.txt'
     TEST_URL = site
     TIMEOUT = timeout
@@ -288,6 +291,7 @@ def HTTP_check(site, timeout, rand_UA):
         for proxy in valid_proxies:
             f.write(proxy + '\n')
 
+    print("")
     percentage = len(valid_proxies) / len(proxies) * 100
     print(f"All done! {len(valid_proxies)} of {len(proxies)} ({percentage:.2f}%) HTTP proxies are currently active.")
 
@@ -297,10 +301,21 @@ def SOCKS4_check(site, timeout, rand_UA):
 def SOCKS5_check(site, timeout, rand_UA):
     pass
 
+## proxy scraping
+
+total_sources = 0
+accessed_sources = 0
+
 def scrape_url(url, proxy_type, error_log):
+    global accessed_sources
+    global total_sources
+
+    total_sources += 1
+
     with contextlib.suppress(requests.exceptions.RequestException):
         response = requests.get(url)
         if response.status_code == 200:
+            accessed_sources += 1
             soup = BeautifulSoup(response.content, 'html.parser')
             scraped_data = soup.get_text()
             if proxy_type == "HTTP":
@@ -317,6 +332,8 @@ def scrape_url(url, proxy_type, error_log):
 
 def scraping_handler(error_log, site, timeout):
     import tqdm
+    global accessed_sources
+    global total_sources
 
     print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
 
@@ -336,23 +353,20 @@ def scraping_handler(error_log, site, timeout):
             thread.start()
             threads.append(thread)
 
-            total_sources += 1
-
     # Wait for all threads to finish
     for thread in threads:
         thread.join()
-        accessed_sources += 1
 
-    percentage = accessed_sources / total_sources * 100
-    print(f"\nTotal Sources: {total_sources} || Accessed Sources: {accessed_sources} || ({percentage:.2f}%)\n")
-
-    if accessed_sources < total_sources:
-        print("Some sources may be blocked, please ensure your network connection is not censored\n")
-    elif accessed_sources == 0:
+    if accessed_sources == 0:
         os.system('cls' if os.name == 'nt' else 'clear')
         print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
         print("\n                     A network error occured, please ensure your device is connected to the internet                \n")
         exit_con()
+    elif accessed_sources < total_sources:
+        print("\nSome sources may be blocked, please ensure your network connection is not censored.")
+
+    percentage = accessed_sources / total_sources * 100
+    print(f"\nTotal Sources: {total_sources} || Accessed Sources: {accessed_sources} || ({percentage:.2f}%)\n")
 
     protocols = ["HTTP", "SOCKS4", "SOCKS5"]
     for protocol in tqdm.tqdm(protocols, desc="Regularizing Proxies", ascii=" #", unit= " prox"):
@@ -364,12 +378,13 @@ def scraping_handler(error_log, site, timeout):
     if prox_check:
         for protocol in protocols:
             checking_handler(site, timeout, protocol, rand_UA)
-    print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
+    exit_con()
 
 def exit_con():
     print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
     print("                                     ||     Thank you for using proXXy.     ||                                          ")
     print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
+    print("")
     exit()
 
 def checking_handler(site, timeout, protocol, rand_UA):
@@ -411,18 +426,22 @@ def main():
 
 def run_update_script():
     current_os = platform.system()
-    if current_os == 'Linux':
+    if (
+        current_os == 'Linux'
+        or current_os != 'Windows'
+        and current_os == 'Darwin'
+    ):
         # Change the permissions of the update script to make it executable
         subprocess.run(['chmod', '+x', 'update.sh'])
         # Run the update script
         subprocess.run(['./update.sh'])
-        exit_con()
     elif current_os == 'Windows':
         # Run the update batch script
         subprocess.run(['update.bat'])
-        exit_con()
     else:
         print('Unsupported operating system.')
+
+    exit_con()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

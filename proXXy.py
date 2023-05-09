@@ -14,6 +14,7 @@ import subprocess
 from bs4 import BeautifulSoup
 from pystyle import *
 
+
 def parameters():
     global rand_UA
     global timeout
@@ -38,15 +39,18 @@ def parameters():
     except Exception:
         prox_check = True
 
-    try:
-        intro()
-        timeout_input = input("How long should the request timeout be? (Default is 10 seconds): ")
-        if timeout_input == "":
-            raise Exception
-        timeout_input = int(timeout_input)
-        timeout = timeout_input if timeout_input > 0 else 10
-    except Exception:
-        timeout = 10
+    if prox_check:
+        try:
+            intro()
+            timeout_input = input("How long should the request timeout be? (Default is 10 seconds): ")
+            if timeout_input == "":
+                raise Exception
+            timeout_input = int(timeout_input)
+            timeout = timeout_input if timeout_input > 0 else 10
+        except Exception:
+            timeout = 10
+    else:
+        timeout = None
 
     if rand_UA:
         user_agents = []
@@ -55,7 +59,9 @@ def parameters():
 
     # Confirmation prompt
     intro()
-    print(f"Selected options:\n\n -- Random user agents: {rand_UA}\n -- Proxy check: {prox_check}\n -- Timeout: {timeout}")
+    print(f"Selected options:\n\n -- Random user agents: {rand_UA}\n -- Proxy check: {prox_check}")
+    if timeout is not None:
+        print(f" -- Timeout: {timeout}")
     confirm_input = input("\nDo you want to continue with these options? (Y/n): ").lower()
 
     # Check user's confirmation

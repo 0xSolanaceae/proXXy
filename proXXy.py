@@ -55,7 +55,7 @@ def parameters():
 
     # Confirmation prompt
     intro()
-    print(f"Selected options:\n\n -- Random user agents: {rand_UA}\n -- Timeout: {timeout}\n -- Proxy check: {prox_check}")
+    print(f"Selected options:\n\n -- Random user agents: {rand_UA}\n -- Proxy check: {prox_check}\n -- Timeout: {timeout}")
     confirm_input = input("\nDo you want to continue with these options? (Y/n): ").lower()
 
     # Check user's confirmation

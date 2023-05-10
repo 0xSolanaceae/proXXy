@@ -10,7 +10,7 @@
  ---
 ***proXXy*** is a powerful tool designed for acquiring and managing a vast quantity of proxies. Its primary purpose is to gather, organize, and provide HTTP, SOCKS4, and SOCKS5 proxies. You can use them to do web scraping, penetration testing, bypassing censorship, simulated DDoS attacks, and more!
 
-The software is currently capable of retrieving over 80,000 proxies from approximately 100 different sources.
+The software is currently capable of retrieving over 50,000 proxies from many different sources.
 
   This project is for educational purposes only— Please do not use this for illegal activities.
 </div>
@@ -65,7 +65,7 @@ python3 proXXy.py -u
 - Added a function to regularize proxies by removing trash values.
 - Updated the proxy scraping function to use contextlib.suppress for better error handling.
 
-![img](https://user-images.githubusercontent.com/89823371/236451862-0060cf19-ed95-45d2-ad9b-0964545a3b26.png)
+![img](https://github.com/Atropa-Solanaceae/proXXy/assets/89823371/d021ede8-5cb4-4ff6-bd77-2faf9a45ab83)
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for more information.

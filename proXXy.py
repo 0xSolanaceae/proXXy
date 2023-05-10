@@ -2,6 +2,7 @@
 #Coded by Solanaceae
 import os
 import re
+import shutil
 import socket
 import random
 import requests
@@ -13,6 +14,7 @@ import contextlib
 import subprocess
 from bs4 import BeautifulSoup
 from pystyle import *
+
 
 
 def parameters():
@@ -71,7 +73,7 @@ def parameters():
     if confirm_input == "n":
         parameters()
 
-def intro(): 
+def intro():
     banner = r"""
  ▄████████   ▄██████▄   ▄█          ▄████████  ███▄▄▄▄      ▄████████  ▄████████    ▄████████    ▄████████    ▄████████ 
   ███    ███ ███    ███ ███         ███    ███ ███▀▀▀██▄   ███    ███ ███    ███   ███    ███   ███    ███   ███    ███ 
@@ -85,7 +87,7 @@ def intro():
     os.system("title proXXy -- by Solanaceae")
     os.system('cls' if os.name == 'nt' else 'clear')
     print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, banner, 1)))
-    print("")
+    print()
 
 def proxy_sources():
     return {
@@ -257,7 +259,7 @@ def regularize_proxies(protocol):
 
     except IOError:
         os.system('cls' if os.name == 'nt' else 'clear')
-        print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
+        print(vanity_line)
         print(f"\n                                           Error: Could not write to {protocol}.txt                                \n")
         exit_con()
 
@@ -300,7 +302,7 @@ def HTTP_check(site, timeout, rand_UA):
         for proxy in valid_proxies:
             f.write(proxy + '\n')
 
-    print("")
+    print()
     percentage = len(valid_proxies) / len(proxies) * 100
     print(f"All done! {len(valid_proxies)} of {len(proxies)} ({percentage:.2f}%) HTTP proxies are currently active.")
 
@@ -344,7 +346,7 @@ def scraping_handler(error_log, site, timeout):
     global accessed_sources
     global total_sources
 
-    print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
+    print(vanity_line)
 
     # proxy sources
     proxies = proxy_sources()
@@ -367,22 +369,46 @@ def scraping_handler(error_log, site, timeout):
         thread.join()
 
     if accessed_sources == 0:
+        error = "|| A network error occured, please ensure your device is connected to the internet. ||"
+
+        empty_space = terminal_width - len(error)
+        left_space = empty_space // 2
+        right_space = empty_space - left_space
+
         os.system('cls' if os.name == 'nt' else 'clear')
-        print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
-        print("\n                     A network error occured, please ensure your device is connected to the internet                \n")
+        print(vanity_line)
+        print()
+        print(" " * left_space + error + " " * right_space)
+        print()
         exit_con()
     elif accessed_sources < total_sources:
-        print("\nSome sources may be blocked, please ensure your network connection is not censored.")
+        error = "|| Some sources may be blocked, please ensure your network connection is not censored. ||"
+
+        empty_space = terminal_width - len(error)
+        left_space = empty_space // 2
+        right_space = empty_space - left_space
+        print()
+        print(" " * left_space + error + " " * right_space)
+
 
     percentage = accessed_sources / total_sources * 100
-    print(f"\nTotal Sources: {total_sources} || Accessed Sources: {accessed_sources} || ({percentage:.2f}%)\n")
+
+    info = f"|| Total Sources: {total_sources} || Accessed Sources: {accessed_sources} || ({percentage:.2f}%) ||"
+
+    # Calculate the remaining empty space on the left and right
+    empty_space = terminal_width - len(info)
+    left_space = empty_space // 2
+    right_space = empty_space - left_space
+
+    print(" " * left_space + info + " " * right_space)
+    print()
 
     protocols = ["HTTP", "SOCKS4", "SOCKS5"]
     for protocol in tqdm.tqdm(protocols, desc="Regularizing Proxies", ascii=" #", unit= " prox"):
         regularize_proxies(protocol)
     for protocol in tqdm.tqdm(protocols, desc="Removing Duplicates", ascii=" #", unit= " prox"):
         remove_duplicate_proxies(protocol)
-    print("")
+    print()
     
     if prox_check:
         for protocol in protocols:
@@ -390,9 +416,16 @@ def scraping_handler(error_log, site, timeout):
     exit_con()
 
 def exit_con():
-    print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
-    print("                                     ||     Thank you for using proXXy.     ||                                          ")
-    print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
+    text = "||     Thank you for using proXXy.     ||"
+
+    # Calculate the remaining empty space on the left and right
+    empty_space = terminal_width - len(text)
+    left_space = empty_space // 2
+    right_space = empty_space - left_space
+
+    print(vanity_line)
+    print(" " * left_space + text + " " * right_space)
+    print(vanity_line)
     exit()
 
 def checking_handler(site, timeout, protocol, rand_UA):
@@ -452,12 +485,19 @@ def run_update_script():
     exit_con()
 
 if __name__ == '__main__':
+    global vanity_line
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', action='store_true', help='Run update script')
     args = parser.parse_args()
 
+    terminal_width = shutil.get_terminal_size().columns
+
+    dash = "—"
+    dashes = dash * (terminal_width - 2)
+    vanity_line = f"<{dashes}>"
+
     if args.u:
         os.system('cls' if os.name == 'nt' else 'clear')
-        print("<——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————>")
+        print(vanity_line)
         run_update_script()
     main()

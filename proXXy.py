@@ -16,79 +16,6 @@ from bs4 import BeautifulSoup
 from pystyle import *
 
 
-
-def parameters():
-    global rand_UA
-    global timeout
-    global prox_check
-    global user_agents
-
-    try:
-        intro()
-        prox_check_input = input("Would you like to check HTTP proxies? (Y/n): ").lower()
-        if prox_check_input == "":
-            raise Exception
-        prox_check = prox_check_input.lower() != "n"
-    except Exception:
-        prox_check = True
-
-    if prox_check:
-        try:
-            intro()
-            rand_UA_input = input("Would you like to use random user agents? (Y/n): ").lower()
-            if rand_UA_input == "":
-                raise Exception
-            rand_UA = rand_UA_input.lower() != "n"
-        except Exception:
-            rand_UA = True
-
-        try:
-            intro()
-            timeout_input = input("How long should the request timeout be? (Default is 10 seconds, cannot be lower than 5): ")
-            if timeout_input == "":
-                raise Exception
-            timeout_input = int(timeout_input)
-            timeout = timeout_input if timeout_input >= 5 else 10
-        except Exception:
-            timeout = 10
-    else:
-        timeout = None
-        rand_UA = None
-
-    if rand_UA:
-        user_agents = []
-        with open("user_agents.txt", "r") as file:
-            user_agents = file.read().splitlines()
-
-    # Confirmation prompt
-    intro()
-    print(f"Selected options:\n\n -- Proxy check: {prox_check}")
-    if rand_UA is not None:
-        print(f" -- Random user agents: {rand_UA}")
-    if timeout is not None:
-        print(f" -- Timeout: {timeout}")
-    confirm_input = input("\nDo you want to continue? (Y/n): ").lower()
-
-    # Check user's confirmation
-    if confirm_input == "n":
-        parameters()
-
-def intro():
-    banner = r"""
- ▄████████   ▄██████▄   ▄█         ▄████████  ███▄▄▄▄      ▄████████  ▄████████    ▄████████    ▄████████    ▄████████ 
-  ███    ███ ███    ███ ███        ███    ███ ███▀▀▀██▄   ███    ███ ███    ███   ███    ███   ███    ███   ███    ███ 
-  ███    █▀  ███    ███ ███        ███    ███ ███   ███   ███    ███ ███    █▀    ███    █▀    ███    ███   ███    █▀  
-  ███        ███    ███ ███        ███    ███ ███   ███   ███    ███ ███         ▄███▄▄▄       ███    ███  ▄███▄▄▄     
-▀███████████ ███    ███ ███      ▀███████████ ███   ███ ▀███████████ ███        ▀▀███▀▀▀     ▀███████████ ▀▀███▀▀▀     
-         ███ ███    ███ ███        ███    ███ ███   ███   ███    ███ ███    █▄    ███    █▄    ███    ███   ███    █▄  
-   ▄█    ███ ███    ███ ███▌    ▄  ███    ███ ███   ███   ███    ███ ███    ███   ███    ███   ███    ███   ███    ███ 
- ▄████████▀   ▀██████▀  █████▄▄██  ███    █▀   ▀█   █▀    ███    █▀  ████████▀    ██████████   ███    █▀    ██████████ """
-
-    os.system("title proXXy -- by Solanaceae")
-    os.system('cls' if os.name == 'nt' else 'clear')
-    print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, banner, 1)))
-    print()
-
 def proxy_sources():
     return {
         "HTTP": [
@@ -177,15 +104,87 @@ def proxy_sources():
             "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks5.txt",
             "https://spys.me/socks.txt",
         ],
-        #"HTTPS": [ # not implemented yet
-        #    "http://sslproxies.org",
-        #    "https://github.com/jetkai/proxy-list/blob/main/online-proxies/txt/proxies-https.txt",
-        #    "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/https.txt",
-        #    "https://raw.githubusercontent.com/HyperBeats/proxy-list/main/https.txt",
-        #    "https://proxyspace.pro/https.txt","
-        #]
+        "HTTPS": [ # not implemented yet
+            "http://sslproxies.org",
+            "https://github.com/jetkai/proxy-list/blob/main/online-proxies/txt/proxies-https.txt",
+            "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/https.txt",
+            "https://raw.githubusercontent.com/HyperBeats/proxy-list/main/https.txt",
+            "https://proxyspace.pro/https.txt",
+        ]
     }
 
+def intro():
+    banner = r"""
+ ▄████████   ▄██████▄   ▄█         ▄████████  ███▄▄▄▄      ▄████████  ▄████████    ▄████████    ▄████████    ▄████████ 
+  ███    ███ ███    ███ ███        ███    ███ ███▀▀▀██▄   ███    ███ ███    ███   ███    ███   ███    ███   ███    ███ 
+  ███    █▀  ███    ███ ███        ███    ███ ███   ███   ███    ███ ███    █▀    ███    █▀    ███    ███   ███    █▀  
+  ███        ███    ███ ███        ███    ███ ███   ███   ███    ███ ███         ▄███▄▄▄       ███    ███  ▄███▄▄▄     
+▀███████████ ███    ███ ███      ▀███████████ ███   ███ ▀███████████ ███        ▀▀███▀▀▀     ▀███████████ ▀▀███▀▀▀     
+         ███ ███    ███ ███        ███    ███ ███   ███   ███    ███ ███    █▄    ███    █▄    ███    ███   ███    █▄  
+   ▄█    ███ ███    ███ ███▌    ▄  ███    ███ ███   ███   ███    ███ ███    ███   ███    ███   ███    ███   ███    ███ 
+ ▄████████▀   ▀██████▀  █████▄▄██  ███    █▀   ▀█   █▀    ███    █▀  ████████▀    ██████████   ███    █▀    ██████████ """
+
+    os.system("title proXXy -- by Solanaceae")
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, banner, 1)))
+    print()
+
+def parameters():
+    global rand_UA
+    global timeout
+    global prox_check
+    global user_agents
+
+
+    try:
+        intro()
+        prox_check_input = input("Would you like to check HTTP proxies? (Y/n): ").lower()
+        if prox_check_input == "":
+            raise Exception
+        prox_check = prox_check_input.lower() != "n"
+    except Exception:
+        prox_check = True
+
+    if prox_check:
+        try:
+            intro()
+            rand_UA_input = input("Would you like to use random user agents? (Y/n): ").lower()
+            if rand_UA_input == "":
+                raise Exception
+            rand_UA = rand_UA_input.lower() != "n"
+        except Exception:
+            rand_UA = True
+
+        try:
+            intro()
+            timeout_input = input("How long should the request timeout be? (Default is 10 seconds, cannot be lower than 5): ")
+            if timeout_input == "":
+                raise Exception
+            timeout_input = int(timeout_input)
+            timeout = timeout_input if timeout_input >= 5 else 10
+        except Exception:
+            timeout = 10
+    else:
+        timeout = None
+        rand_UA = None
+
+    if rand_UA:
+        user_agents = []
+        with open("user_agents.txt", "r") as file:
+            user_agents = file.read().splitlines()
+
+    # Confirmation prompt
+    intro()
+    print(f"Selected options:\n\n -- Proxy check: {prox_check}")
+    if rand_UA is not None:
+        print(f" -- Random user agents: {rand_UA}")
+    if timeout is not None:
+        print(f" -- Timeout: {timeout}")
+    confirm_input = input("\nDo you want to continue? (Y/n): ").lower()
+
+    # Check user's confirmation
+    if confirm_input == "n":
+        parameters()
 
 
 ## proxy processing
@@ -279,6 +278,7 @@ def HTTP_check(site, timeout, rand_UA):
             f.write(proxy + '\n')
 
     percentage = len(valid_proxies) / len(proxies) * 100
+    print()
     print(f"All done! {len(valid_proxies)} of {len(proxies)} ({percentage:.2f}%) HTTP proxies are currently active.")
 
 def SOCKS4_check(site, timeout, rand_UA):
@@ -287,10 +287,10 @@ def SOCKS4_check(site, timeout, rand_UA):
 def SOCKS5_check(site, timeout, rand_UA):
     pass
 
-## proxy scraping
+def HTTPS_check(site, timeout, rand_UA):
+    pass
 
-total_sources = 0
-accessed_sources = 0
+## proxy scraping
 
 def scrape_url(url, proxy_type, error_log):
     global accessed_sources
@@ -298,7 +298,6 @@ def scrape_url(url, proxy_type, error_log):
 
     total_sources += 1
 
-    #with contextlib.suppress(requests.exceptions.RequestException):
     try:
         response = requests.get(url)
         if response.status_code == 200:
@@ -313,6 +312,9 @@ def scrape_url(url, proxy_type, error_log):
                     file_socks4.write(scraped_data + '\n')
             elif proxy_type == "SOCKS5":
                 with open("scraped/SOCKS5.txt", "a") as file_socks5:
+                    file_socks5.write(scraped_data + '\n')
+            elif proxy_type == "HTTPS":
+                with open("scraped/HTTPS.txt", "a") as file_socks5:
                     file_socks5.write(scraped_data + '\n')
         else:
             error_log.write(f"Could not access: {url}\n")
@@ -334,14 +336,14 @@ def scraping_handler(error_log, site, timeout):
 
     threads = []
     # webscraping proxies
-    for proxy_type, urls in proxies.items():
-        for url in tqdm.tqdm(urls, desc=f"Scraping {proxy_type}", ascii=" #", unit=" src"):
+    for proxy_type, urls in tqdm.tqdm(proxies.items(), desc="Scraping Sources", ascii=" #", unit=" src"):
+        for url in urls:
             thread = threading.Thread(target=scrape_url, args=(url, proxy_type, error_log))
             thread.start()
             threads.append(thread)
 
     # Wait for all threads to finish
-    for thread in tqdm.tqdm(threads, desc="Joining threads", ascii=" #", unit= " thr"):
+    for thread in tqdm.tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
         thread.join()
     print()
 
@@ -376,7 +378,7 @@ def scraping_handler(error_log, site, timeout):
     print(" " * left_space + info + " " * right_space)
     print()
 
-    protocols = ["HTTP", "SOCKS4", "SOCKS5"]
+    protocols = ["HTTP", "SOCKS4", "SOCKS5", "HTTPS"]
     for protocol in tqdm.tqdm(protocols, desc="Regularizing Proxies", ascii=" #", unit= " prox"):
         regularize_proxies(protocol)
     for protocol in tqdm.tqdm(protocols, desc="Removing Duplicates", ascii=" #", unit= " prox"):
@@ -417,6 +419,11 @@ def checking_handler(site, timeout, protocol, rand_UA):
             SOCKS5_check(site, timeout, rand_UA)
         except Exception:
             exit_con()
+    elif protocol == "HTTPS":
+        try:
+            HTTPS_check(site, timeout, rand_UA)
+        except Exception:
+            exit_con()
 
 def init_main(error_log, site, timeout):
     try: 
@@ -432,7 +439,7 @@ def main():
         warnings.filterwarnings("ignore", category=UserWarning, message=".*looks like you're parsing an XML document using an HTML parser.*")
         site = "http://httpbin.org/ip"
         # initialize files
-        with open("scraped/HTTP.txt", "w"), open("scraped/SOCKS4.txt", "w"), open("scraped/SOCKS5.txt", "w"), open("error.log", "w") as error_log:
+        with open("scraped/HTTP.txt", "w"), open("scraped/SOCKS4.txt", "w"), open("scraped/SOCKS5.txt", "w"), open("scraped/HTTPS.txt", "w"), open("error.log", "w") as error_log:
             init_main(error_log, site, timeout)
     except KeyboardInterrupt:
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -459,6 +466,9 @@ def run_update_script():
 
 if __name__ == '__main__':
     global vanity_line
+    global total_sources
+    global accessed_sources
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', action='store_true', help='Run update script')
     args = parser.parse_args()
@@ -473,4 +483,7 @@ if __name__ == '__main__':
         os.system('cls' if os.name == 'nt' else 'clear')
         print(vanity_line)
         run_update_script()
+
+    total_sources = 0
+    accessed_sources = 0
     main()

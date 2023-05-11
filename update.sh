@@ -16,7 +16,7 @@ command -v pip >/dev/null 2>&1 || { echo >&2 "pip is required but not installed.
 if [ -d "proXXy" ]; then
     echo "Updating existing repository..."
     cd proXXy || exit
-    git pull origin master
+    git pull origin
 else
     echo "Cloning repository..."
     git clone "$REPO_URL" proXXy

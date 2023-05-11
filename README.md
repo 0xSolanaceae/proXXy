@@ -51,9 +51,9 @@ python3 proXXy.py -u
 - Implement a feature for automatically testing the scraped proxies to verify their functionality. (1/3rd completed) 
 - Proxy sorting instead of hardcoding.
 - Provide an option to discern between Elite, Anonymous, and Transparent anonymity classes of proxies.
-- Add support for HTTPS proxies.
 
 ## Added Features
+- HTTPS support.
 - Easy updating!
 - Added asynchronous webscraping.
 - Fixed random user agents option.

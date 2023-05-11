@@ -104,7 +104,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks5.txt",
             "https://spys.me/socks.txt",
         ],
-        "HTTPS": [ # not implemented yet
+        "HTTPS": [
             "http://sslproxies.org",
             "https://github.com/jetkai/proxy-list/blob/main/online-proxies/txt/proxies-https.txt",
             "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/https.txt",

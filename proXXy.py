@@ -48,7 +48,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies_anonymous/http.txt",
             "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/http.txt",
             "https://sunny9577.github.io/proxy-scraper/proxies.txt",
-            "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/http.txt", # good one
+            "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/http.txt",
             "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/http.txt",
             "https://raw.githubusercontent.com/prxchk/proxy-list/main/http.txt",
             "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/http.txt",
@@ -73,7 +73,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies/socks4.txt",
             "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies_anonymous/socks4.txt",
             "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/socks4.txt",
-            "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks4.txt", # good one
+            "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks4.txt",
             "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/socks4.txt",
             "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks4.txt",
             "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks4.txt",
@@ -98,15 +98,15 @@ def proxy_sources():
             "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies/socks5.txt",
             "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies_anonymous/socks5.txt",
             "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/socks5.txt",
-            "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks5.txt", # good one
+            "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks5.txt",
             "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/socks5.txt",
             "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks5.txt",
             "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks5.txt",
             "https://spys.me/socks.txt",
         ],
-        "HTTPS": [ # not implemented yet
+        "HTTPS": [
             "http://sslproxies.org",
-            "https://github.com/jetkai/proxy-list/blob/main/online-proxies/txt/proxies-https.txt",
+            "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-https.txt",
             "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/https.txt",
             "https://raw.githubusercontent.com/HyperBeats/proxy-list/main/https.txt",
             "https://proxyspace.pro/https.txt",
@@ -135,10 +135,9 @@ def parameters():
     global prox_check
     global user_agents
 
-
     try:
         intro()
-        prox_check_input = input("Would you like to check HTTP proxies? (Y/n): ").lower()
+        prox_check_input = input("Would you like to check proxies? (Y/n): ").lower()
         if prox_check_input == "":
             raise Exception
         prox_check = prox_check_input.lower() != "n"
@@ -240,6 +239,12 @@ def regularize_proxies(protocol):
 
 ## checking portion
 
+def SOCKS4_check(site, timeout, rand_UA):
+    pass
+
+def SOCKS5_check(site, timeout, rand_UA):
+    pass
+
 def HTTP_check(site, timeout, rand_UA):
     import tqdm
     
@@ -259,36 +264,70 @@ def HTTP_check(site, timeout, rand_UA):
             if response.status_code == 200:
                 results.append(proxy)
 
-    proxies = []
-    valid_proxies = []
+    http_proxies = []
+    http_valid_proxies = []
+    with open(PROXY_LIST_FILE, 'r') as f:
+        http_proxies = [line.strip() for line in f.readlines()]
+
+    threads = []
+    for proxy in tqdm.tqdm(http_proxies, desc="Checking HTTP Proxies", ascii=" #", unit= " prox"):
+        thread = threading.Thread(target=test_proxy, args=(proxy, http_valid_proxies), daemon=True)
+        threads.append(thread)
+        thread.start()
+
+    for thread in tqdm.tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
+        thread.join()
+
+    with open(PROXY_LIST_FILE, 'w') as f:
+        for proxy in http_valid_proxies:
+            f.write(proxy + '\n')
+    
+    http_percentage = len(http_valid_proxies) / len(http_proxies) * 100
+
+    conclusion_handler("HTTP", http_valid_proxies, http_proxies, http_percentage)
+
+def HTTPS_check(site, timeout, rand_UA):
+    '''import tqdm
+    
+    PROXY_LIST_FILE = 'scraped/HTTPS.txt'
+    TEST_URL = site
+    TIMEOUT = timeout
+
+    def test_proxy(proxy, results):
+        with contextlib.suppress(requests.exceptions.RequestException, socket.timeout):
+            headers = {}
+            if rand_UA:
+                headers['User-Agent'] = random.choice(user_agents)
+            else:
+                headers['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/37.0.2062.94 Chrome/37.0.2062.94 Safari/537.36'
+
+            response = requests.get(TEST_URL, proxies={'https': proxy}, headers=headers, timeout=TIMEOUT)
+            if response.status_code == 200:
+                results.append(proxy)
+
+    https_proxies = []
+    https_valid_proxies = []
     with open(PROXY_LIST_FILE, 'r') as f:
         proxies = [line.strip() for line in f.readlines()]
 
     threads = []
-    for proxy in tqdm.tqdm(proxies, desc="Checking HTTP proxies", ascii=" #", unit= " prox"):
-        thread = threading.Thread(target=test_proxy, args=(proxy, valid_proxies), daemon=True)
+    for proxy in tqdm.tqdm(proxies, desc="Checking HTTPS Proxies", ascii=" #", unit= " prox"):
+        thread = threading.Thread(target=test_proxy, args=(proxy, https_valid_proxies), daemon=True)
         threads.append(thread)
         thread.start()
 
-    for thread in tqdm.tqdm(threads, desc="Joining threads", ascii=" #", unit= " thr"):
+    for thread in tqdm.tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
         thread.join()
 
     with open(PROXY_LIST_FILE, 'w') as f:
-        for proxy in valid_proxies:
+        for proxy in https_valid_proxies:
             f.write(proxy + '\n')
 
-    percentage = len(valid_proxies) / len(proxies) * 100
-    print()
-    print(f"All done! {len(valid_proxies)} of {len(proxies)} ({percentage:.2f}%) HTTP proxies are currently active.")
+    https_percentage = len(https_valid_proxies) / len(https_proxies) * 100
+    conclusion_handler("HTTPS", https_valid_proxies, https_proxies, https_percentage)'''
 
-def SOCKS4_check(site, timeout, rand_UA):
-    pass
-
-def SOCKS5_check(site, timeout, rand_UA):
-    pass
-
-def HTTPS_check(site, timeout, rand_UA):
-    pass
+def conclusion_handler(protocol, valid, total, percentage):
+    print(f"All done! {len(valid)} of {len(total)} ({percentage:.2f}%) {protocol} proxies are currently active.")
 
 ## proxy scraping
 
@@ -378,7 +417,7 @@ def scraping_handler(error_log, site, timeout):
     print(" " * left_space + info + " " * right_space)
     print()
 
-    protocols = ["HTTP", "SOCKS4", "SOCKS5", "HTTPS"]
+    protocols = ["SOCKS4", "SOCKS5", "HTTP", "HTTPS"]
     for protocol in tqdm.tqdm(protocols, desc="Regularizing Proxies", ascii=" #", unit= " prox"):
         regularize_proxies(protocol)
     for protocol in tqdm.tqdm(protocols, desc="Removing Duplicates", ascii=" #", unit= " prox"):
@@ -388,6 +427,7 @@ def scraping_handler(error_log, site, timeout):
     if prox_check:
         for protocol in protocols:
             checking_handler(site, timeout, protocol, rand_UA)
+
     exit_con()
 
 def exit_con():
@@ -404,26 +444,18 @@ def exit_con():
     exit()
 
 def checking_handler(site, timeout, protocol, rand_UA):
-    if protocol == "HTTP":
-        try:
-            HTTP_check(site, timeout, rand_UA)
-        except Exception:
-            exit_con()
-    elif protocol == "SOCKS4":
-        try:
+    if protocol == "SOCKS4":
+        with contextlib.suppress(Exception):
             SOCKS4_check(site, timeout, rand_UA)
-        except Exception:
-            exit_con()
     elif protocol == "SOCKS5":
-        try:
+        with contextlib.suppress(Exception):
             SOCKS5_check(site, timeout, rand_UA)
-        except Exception:
-            exit_con()
+    elif protocol == "HTTP":
+        with contextlib.suppress(Exception):
+            HTTP_check(site, timeout, rand_UA)
     elif protocol == "HTTPS":
-        try:
+        with contextlib.suppress(Exception):
             HTTPS_check(site, timeout, rand_UA)
-        except Exception:
-            exit_con()
 
 def init_main(error_log, site, timeout):
     try: 

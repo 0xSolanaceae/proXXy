@@ -9,29 +9,16 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM Check if pip is installed
-where pip >nul 2>&1
-if %errorlevel% neq 0 (
-    echo pip is required but not installed. Aborting.
-    exit /b 1
-)
-
 REM Clone or update the repository
 if exist "proXXy" (
     echo Updating existing repository...
     cd proXXy || exit /b
     git pull origin master
-    
 ) else (
-
     echo Cloning repository...
     git clone %REPO_URL% proXXy
     cd proXXy || exit /b
 )
-
-REM Install required packages
-echo Installing required packages...
-pip install -r requirements.txt
 
 REM Copy the updated files to the current directory
 echo Copying files...
@@ -42,6 +29,5 @@ echo Cleaning up...
 pushd ..
 rmdir /S /Q proXXy
 popd
-
 
 echo Update completed.

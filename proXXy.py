@@ -104,7 +104,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks5.txt",
             "https://spys.me/socks.txt",
         ],
-        "HTTPS": [
+        "HTTPS": [ # not implemented yet
             "http://sslproxies.org",
             "https://github.com/jetkai/proxy-list/blob/main/online-proxies/txt/proxies-https.txt",
             "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/https.txt",
@@ -314,8 +314,8 @@ def scrape_url(url, proxy_type, error_log):
                 with open("scraped/SOCKS5.txt", "a") as file_socks5:
                     file_socks5.write(scraped_data + '\n')
             elif proxy_type == "HTTPS":
-                with open("scraped/HTTPS.txt", "a") as file_socks5:
-                    file_socks5.write(scraped_data + '\n')
+                with open("scraped/HTTPS.txt", "a") as file_https:
+                    file_https.write(scraped_data + '\n')
         else:
             error_log.write(f"Could not access: {url}\n")
     except Exception:

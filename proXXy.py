@@ -1,19 +1,19 @@
 #!/usr/bin/python3
 #Coded by Solanaceae
-import os
-import re
-import shutil
-import socket
-import random
-import requests
-import warnings
-import platform
-import argparse
-import threading
-import contextlib
-import subprocess
+from os import name, system
+from re import findall
+from shutil import get_terminal_size
+from socket import timeout as socket_timeout
+from random import choice
+from requests import get, exceptions
+from warnings import filterwarnings
+from platform import system as platform_system
+from argparse import ArgumentParser
+from threading import Thread
+from contextlib import suppress
+from subprocess import run
 from bs4 import BeautifulSoup
-from pystyle import *
+from pystyle import Colors, Colorate, Center
 
 
 def proxy_sources():
@@ -124,8 +124,8 @@ def intro():
    ▄█    ███ ███    ███ ███▌    ▄  ███    ███ ███   ███   ███    ███ ███    ███   ███    ███   ███    ███   ███    ███ 
  ▄████████▀   ▀██████▀  █████▄▄██  ███    █▀   ▀█   █▀    ███    █▀  ████████▀    ██████████   ███    █▀    ██████████ """
 
-    os.system("title proXXy -- by Solanaceae")
-    os.system('cls' if os.name == 'nt' else 'clear')
+    system("title proXXy -- by Solanaceae")
+    system('cls' if name == 'nt' else 'clear')
     print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, banner, 1)))
     print()
 
@@ -222,7 +222,7 @@ def regularize_proxies(protocol):
 
     # Define a regex pattern to match proxies
     proxy_pattern = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+'
-    proxies = re.findall(proxy_pattern, text_data)
+    proxies = findall(proxy_pattern, text_data)
 
     # Overwrite the original text document with the regularized proxies
     try:
@@ -232,7 +232,7 @@ def regularize_proxies(protocol):
                 file.write(proxy + '\n')
 
     except IOError:
-        os.system('cls' if os.name == 'nt' else 'clear')
+        system('cls' if name == 'nt' else 'clear')
         print(vanity_line)
         print(f"\nError: Could not write to {protocol}.txt\n")
         exit_con()
@@ -246,21 +246,21 @@ def SOCKS5_check(site, timeout, rand_UA):
     pass
 
 def HTTP_check(site, timeout, rand_UA):
-    import tqdm
+    from tqdm import tqdm
     
     PROXY_LIST_FILE = 'scraped/HTTP.txt'
     TEST_URL = site
     TIMEOUT = timeout
 
     def test_proxy(proxy, results):
-        with contextlib.suppress(requests.exceptions.RequestException, socket.timeout):
+        with suppress(exceptions.RequestException, socket_timeout):
             headers = {}
             if rand_UA:
-                headers['User-Agent'] = random.choice(user_agents)
+                headers['User-Agent'] = choice(user_agents)
             else:
                 headers['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/37.0.2062.94 Chrome/37.0.2062.94 Safari/537.36'
 
-            response = requests.get(TEST_URL, proxies={'http': proxy}, headers=headers, timeout=TIMEOUT)
+            response = get(TEST_URL, proxies={'http': proxy}, headers=headers, timeout=TIMEOUT)
             if response.status_code == 200:
                 results.append(proxy)
 
@@ -270,12 +270,12 @@ def HTTP_check(site, timeout, rand_UA):
         http_proxies = [line.strip() for line in f.readlines()]
 
     threads = []
-    for proxy in tqdm.tqdm(http_proxies, desc="Checking HTTP Proxies", ascii=" #", unit= " prox"):
-        thread = threading.Thread(target=test_proxy, args=(proxy, http_valid_proxies), daemon=True)
+    for proxy in tqdm(http_proxies, desc="Checking HTTP Proxies", ascii=" #", unit= " prox"):
+        thread = Thread(target=test_proxy, args=(proxy, http_valid_proxies), daemon=True)
         threads.append(thread)
         thread.start()
 
-    for thread in tqdm.tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
+    for thread in tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
         thread.join()
 
     with open(PROXY_LIST_FILE, 'w') as f:
@@ -287,21 +287,21 @@ def HTTP_check(site, timeout, rand_UA):
     conclusion_handler("HTTP", http_valid_proxies, http_proxies, http_percentage)
 
 def HTTPS_check(site, timeout, rand_UA):
-    '''import tqdm
+    '''from tqdm import tqdm
     
     PROXY_LIST_FILE = 'scraped/HTTPS.txt'
     TEST_URL = site
     TIMEOUT = timeout
 
     def test_proxy(proxy, results):
-        with contextlib.suppress(requests.exceptions.RequestException, socket.timeout):
+        with suppress(exceptions.RequestException, socket_timeout):
             headers = {}
             if rand_UA:
-                headers['User-Agent'] = random.choice(user_agents)
+                headers['User-Agent'] = choice(user_agents)
             else:
                 headers['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/37.0.2062.94 Chrome/37.0.2062.94 Safari/537.36'
 
-            response = requests.get(TEST_URL, proxies={'https': proxy}, headers=headers, timeout=TIMEOUT)
+            response = get(TEST_URL, proxies={'https': proxy}, headers=headers, timeout=TIMEOUT)
             if response.status_code == 200:
                 results.append(proxy)
 
@@ -311,12 +311,12 @@ def HTTPS_check(site, timeout, rand_UA):
         proxies = [line.strip() for line in f.readlines()]
 
     threads = []
-    for proxy in tqdm.tqdm(proxies, desc="Checking HTTPS Proxies", ascii=" #", unit= " prox"):
-        thread = threading.Thread(target=test_proxy, args=(proxy, https_valid_proxies), daemon=True)
+    for proxy in tqdm(proxies, desc="Checking HTTPS Proxies", ascii=" #", unit= " prox"):
+        thread = Thread(target=test_proxy, args=(proxy, https_valid_proxies), daemon=True)
         threads.append(thread)
         thread.start()
 
-    for thread in tqdm.tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
+    for thread in tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
         thread.join()
 
     with open(PROXY_LIST_FILE, 'w') as f:
@@ -338,7 +338,7 @@ def scrape_url(url, proxy_type, error_log):
     total_sources += 1
 
     try:
-        response = requests.get(url)
+        response = get(url)
         if response.status_code == 200:
             accessed_sources += 1
             soup = BeautifulSoup(response.content, 'html.parser')
@@ -361,7 +361,7 @@ def scrape_url(url, proxy_type, error_log):
         error_log.write(f"Could not access: {url}\n")
 
 def scraping_handler(error_log, site, timeout):
-    import tqdm
+    from tqdm import tqdm
     global accessed_sources
     global total_sources
 
@@ -375,14 +375,14 @@ def scraping_handler(error_log, site, timeout):
 
     threads = []
     # webscraping proxies
-    for proxy_type, urls in tqdm.tqdm(proxies.items(), desc="Scraping Sources", ascii=" #", unit=" src"):
+    for proxy_type, urls in tqdm(proxies.items(), desc="Scraping Sources", ascii=" #", unit=" src"):
         for url in urls:
-            thread = threading.Thread(target=scrape_url, args=(url, proxy_type, error_log))
+            thread = Thread(target=scrape_url, args=(url, proxy_type, error_log))
             thread.start()
             threads.append(thread)
 
     # Wait for all threads to finish
-    for thread in tqdm.tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
+    for thread in tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
         thread.join()
     print()
 
@@ -393,7 +393,7 @@ def scraping_handler(error_log, site, timeout):
         left_space = empty_space // 2
         right_space = empty_space - left_space
 
-        os.system('cls' if os.name == 'nt' else 'clear')
+        system('cls' if name == 'nt' else 'clear')
         print(vanity_line)
         print(" " * left_space + error + " " * right_space)
         exit_con()
@@ -418,9 +418,9 @@ def scraping_handler(error_log, site, timeout):
     print()
 
     protocols = ["SOCKS4", "SOCKS5", "HTTP", "HTTPS"]
-    for protocol in tqdm.tqdm(protocols, desc="Regularizing Proxies", ascii=" #", unit= " prox"):
+    for protocol in tqdm(protocols, desc="Regularizing Proxies", ascii=" #", unit= " prox"):
         regularize_proxies(protocol)
-    for protocol in tqdm.tqdm(protocols, desc="Removing Duplicates", ascii=" #", unit= " prox"):
+    for protocol in tqdm(protocols, desc="Removing Duplicates", ascii=" #", unit= " prox"):
         remove_duplicate_proxies(protocol)
     print()
     
@@ -445,52 +445,52 @@ def exit_con():
 
 def checking_handler(site, timeout, protocol, rand_UA):
     if protocol == "SOCKS4":
-        with contextlib.suppress(Exception):
+        with suppress(Exception):
             SOCKS4_check(site, timeout, rand_UA)
     elif protocol == "SOCKS5":
-        with contextlib.suppress(Exception):
+        with suppress(Exception):
             SOCKS5_check(site, timeout, rand_UA)
     elif protocol == "HTTP":
-        with contextlib.suppress(Exception):
+        with suppress(Exception):
             HTTP_check(site, timeout, rand_UA)
     elif protocol == "HTTPS":
-        with contextlib.suppress(Exception):
+        with suppress(Exception):
             HTTPS_check(site, timeout, rand_UA)
 
 def init_main(error_log, site, timeout):
     try: 
         scraping_handler(error_log, site, timeout)
     except KeyboardInterrupt:
-        os.system('cls' if os.name == 'nt' else 'clear')
+        system('cls' if name == 'nt' else 'clear')
         exit_con()
 
 def main():
     try:
         parameters()
         intro()
-        warnings.filterwarnings("ignore", category=UserWarning, message=".*looks like you're parsing an XML document using an HTML parser.*")
+        filterwarnings("ignore", category=UserWarning, message=".*looks like you're parsing an XML document using an HTML parser.*")
         site = "http://httpbin.org/ip"
         # initialize files
         with open("scraped/HTTP.txt", "w"), open("scraped/SOCKS4.txt", "w"), open("scraped/SOCKS5.txt", "w"), open("scraped/HTTPS.txt", "w"), open("error.log", "w") as error_log:
             init_main(error_log, site, timeout)
     except KeyboardInterrupt:
-        os.system('cls' if os.name == 'nt' else 'clear')
+        system('cls' if name == 'nt' else 'clear')
         exit_con()
 
 def run_update_script():
-    current_os = platform.system()
+    current_os = platform_system()
     if (
         current_os == 'Linux'
         or current_os != 'Windows'
         and current_os == 'Darwin'
     ):
         # Change the permissions of the update script to make it executable
-        subprocess.run(['chmod', '+x', 'update.sh'])
+        run(['chmod', '+x', 'update.sh'])
         # Run the update script
-        subprocess.run(['./update.sh'])
+        run(['./update.sh'])
     elif current_os == 'Windows':
         # Run the update batch script
-        subprocess.run(['update.bat'])
+        run(['update.bat'])
     else:
         print('Unsupported operating system.')
 
@@ -501,18 +501,18 @@ if __name__ == '__main__':
     global total_sources
     global accessed_sources
 
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     parser.add_argument('-u', action='store_true', help='Run update script')
     args = parser.parse_args()
 
-    terminal_width = shutil.get_terminal_size().columns
+    terminal_width = get_terminal_size().columns
 
     dash = "—"
     dashes = dash * (terminal_width - 2)
     vanity_line = f"<{dashes}>"
 
     if args.u:
-        os.system('cls' if os.name == 'nt' else 'clear')
+        system('cls' if name == 'nt' else 'clear')
         print(vanity_line)
         run_update_script()
 

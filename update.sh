@@ -1,39 +1,42 @@
 #!/bin/bash
 
 REPO_URL="https://github.com/Atropa-Solanaceae/proXXy"
-
-# Install required packages
-echo "Installing required packages..."
-pip install -r requirements.txt
+REPO_DIR="proXXy"
 
 # Check if Git is installed
-command -v git >/dev/null 2>&1 || { echo >&2 "Git is required but not installed. Aborting."; exit 1; }
+if ! command -v git &>/dev/null; then
+    echo >&2 "Git is required but not installed. Aborting."
+    exit 1
+fi
 
 # Check if pip is installed
-command -v pip >/dev/null 2>&1 || { echo >&2 "pip is required but not installed. Aborting."; exit 1; }
+if ! command -v pip &>/dev/null; then
+    echo >&2 "pip is required but not installed. Aborting."
+    exit 1
+fi
 
 # Clone or update the repository
-if [ -d "proXXy" ]; then
+if [ -d "$REPO_DIR" ]; then
     echo "Updating existing repository..."
-    cd proXXy || exit
+    cd "$REPO_DIR"
     git pull origin
 else
     echo "Cloning repository..."
-    git clone "$REPO_URL" proXXy
-    cd proXXy || exit
+    git clone "$REPO_URL" "$REPO_DIR"
+    cd "$REPO_DIR" || exit
 fi
 
 # Install required packages
 echo "Installing required packages..."
 pip install -r requirements.txt
 
-# Copy the updated files to the current directory
+# Copy the updated files to the parent directory
 echo "Copying files..."
 cp -R ./* ..
-cd .. || exit
 
+# Clean up
 echo "Cleaning up..."
-rm -rf proXXy
-
+cd ..
+rm -rf "$REPO_DIR"
 
 echo "Update completed."

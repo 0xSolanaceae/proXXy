@@ -15,7 +15,6 @@ from subprocess import run
 from bs4 import BeautifulSoup
 from pystyle import Colors, Colorate, Center
 
-
 def proxy_sources():
     return {
         "HTTP": [
@@ -247,6 +246,7 @@ def SOCKS5_check(site, timeout, rand_UA):
 
 def HTTP_check(site, timeout, rand_UA):
     from tqdm import tqdm
+    global http_valid_proxies, http_proxies, http_percentage
     
     PROXY_LIST_FILE = 'scraped/HTTP.txt'
     TEST_URL = site
@@ -275,19 +275,19 @@ def HTTP_check(site, timeout, rand_UA):
         threads.append(thread)
         thread.start()
 
-    for thread in tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
+    http_percentage = len(http_valid_proxies) / len(http_proxies) * 100
+
+    for thread in threads: #tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
         thread.join()
 
     with open(PROXY_LIST_FILE, 'w') as f:
         for proxy in http_valid_proxies:
             f.write(proxy + '\n')
     
-    http_percentage = len(http_valid_proxies) / len(http_proxies) * 100
-
-    conclusion_handler("HTTP", http_valid_proxies, http_proxies, http_percentage)
 
 def HTTPS_check(site, timeout, rand_UA):
-    '''from tqdm import tqdm
+    from tqdm import tqdm
+    global https_valid_proxies, https_proxies, https_percentage
     
     PROXY_LIST_FILE = 'scraped/HTTPS.txt'
     TEST_URL = site
@@ -308,26 +308,22 @@ def HTTPS_check(site, timeout, rand_UA):
     https_proxies = []
     https_valid_proxies = []
     with open(PROXY_LIST_FILE, 'r') as f:
-        proxies = [line.strip() for line in f.readlines()]
+        https_proxies = [line.strip() for line in f.readlines()]
 
     threads = []
-    for proxy in tqdm(proxies, desc="Checking HTTPS Proxies", ascii=" #", unit= " prox"):
+    for proxy in tqdm(https_proxies, desc="Checking HTTPS Proxies", ascii=" #", unit= " prox"):
         thread = Thread(target=test_proxy, args=(proxy, https_valid_proxies), daemon=True)
         threads.append(thread)
         thread.start()
 
-    for thread in tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
+    https_percentage = len(https_valid_proxies) / len(https_proxies) * 100
+
+    for thread in threads: #tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
         thread.join()
 
     with open(PROXY_LIST_FILE, 'w') as f:
         for proxy in https_valid_proxies:
             f.write(proxy + '\n')
-
-    https_percentage = len(https_valid_proxies) / len(https_proxies) * 100
-    conclusion_handler("HTTPS", https_valid_proxies, https_proxies, https_percentage)'''
-
-def conclusion_handler(protocol, valid, total, percentage):
-    print(f"All done! {len(valid)} of {len(total)} ({percentage:.2f}%) {protocol} proxies are currently active.")
 
 ## proxy scraping
 
@@ -382,7 +378,7 @@ def scraping_handler(error_log, site, timeout):
             threads.append(thread)
 
     # Wait for all threads to finish
-    for thread in tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
+    for thread in threads:
         thread.join()
     print()
 
@@ -427,6 +423,10 @@ def scraping_handler(error_log, site, timeout):
     if prox_check:
         for protocol in protocols:
             checking_handler(site, timeout, protocol, rand_UA)
+    
+    print()
+    print(f"|| {len(http_valid_proxies)} of {len(http_proxies)} ({http_percentage:.2f}%) HTTP proxies are currently active.")
+    print(f"|| {len(https_valid_proxies)} of {len(https_proxies)} ({https_percentage:.2f}%) HTTPS proxies are currently active.")
 
     exit_con()
 

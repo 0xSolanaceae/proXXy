@@ -425,12 +425,12 @@ def scraping_handler(error_log, site, timeout):
         for protocol in protocols:
             checking_handler(site, timeout, protocol, rand_UA)
 
-    print()
-    with suppress(Exception):
-        print(f"|| {len(http_valid_proxies)} of {len(http_proxies)} ({http_percentage:.2f}%) HTTP proxies are currently active.")
-    with suppress(Exception):
-        print(f"|| {len(https_valid_proxies)} of {len(https_proxies)} ({https_percentage:.2f}%) HTTPS proxies are currently active.")
-    exit_con()
+        print()
+        with suppress(Exception):
+            print(f"|| {len(http_valid_proxies)} of {len(http_proxies)} ({http_percentage:.2f}%) HTTP proxies are currently active.")
+        with suppress(Exception):
+            print(f"|| {len(https_valid_proxies)} of {len(https_proxies)} ({https_percentage:.2f}%) HTTPS proxies are currently active.")
+        exit_con()
 
 def exit_con():
     text = "||     Thank you for using proXXy.     ||"

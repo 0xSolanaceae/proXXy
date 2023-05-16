@@ -112,7 +112,7 @@ def proxy_sources():
         ]
     }
 
-def intro():
+def banner():
     banner = r"""
  ▄████████   ▄██████▄   ▄█         ▄████████  ███▄▄▄▄      ▄████████  ▄████████    ▄████████    ▄████████    ▄████████ 
   ███    ███ ███    ███ ███        ███    ███ ███▀▀▀██▄   ███    ███ ███    ███   ███    ███   ███    ███   ███    ███ 
@@ -135,7 +135,7 @@ def parameters():
     global user_agents
 
     try:
-        intro()
+        banner()
         prox_check_input = input("Would you like to check proxies? (Y/n): ").lower()
         if prox_check_input == "":
             raise Exception
@@ -145,7 +145,7 @@ def parameters():
 
     if prox_check:
         try:
-            intro()
+            banner()
             rand_UA_input = input("Would you like to use random user agents? (Y/n): ").lower()
             if rand_UA_input == "":
                 raise Exception
@@ -154,7 +154,7 @@ def parameters():
             rand_UA = True
 
         try:
-            intro()
+            banner()
             timeout_input = input("How long should the request timeout be? (Default is 10 seconds, cannot be lower than 5): ")
             if timeout_input == "":
                 raise Exception
@@ -172,8 +172,8 @@ def parameters():
             user_agents = file.read().splitlines()
 
     # Confirmation prompt
-    intro()
-    print(f"Selected options:\n\n -- Proxy check: {prox_check}")
+    banner()
+    print(f"Selected option(s):\n\n -- Proxy check: {prox_check}")
     if rand_UA is not None:
         print(f" -- Random user agents: {rand_UA}")
     if timeout is not None:
@@ -184,9 +184,7 @@ def parameters():
     if confirm_input == "n":
         parameters()
 
-
 ## proxy processing
-
 
 def remove_duplicate_proxies(protocol):
     # Read in the text document
@@ -281,7 +279,6 @@ def HTTP_check(site, timeout, rand_UA):
         for proxy in http_valid_proxies:
             f.write(proxy + '\n')
     
-
 def HTTPS_check(site, timeout, rand_UA):
     import tqdm
     
@@ -413,7 +410,7 @@ def scraping_handler(error_log, site, timeout):
     for protocol in tqdm.tqdm(protocols, desc="Removing Duplicates", ascii=" #", unit= " prox"):
         remove_duplicate_proxies(protocol)
     print()
-    
+
     if prox_check:
         for protocol in protocols:
             checking_handler(site, timeout, protocol, rand_UA)
@@ -422,6 +419,11 @@ def scraping_handler(error_log, site, timeout):
     #print(f"|| {len(http_valid_proxies)} of {len(http_proxies)} ({http_percentage:.2f}%) HTTP proxies are currently active.")
     #print(f"|| {len(https_valid_proxies)} of {len(https_proxies)} ({https_percentage:.2f}%) HTTPS proxies are currently active.")
 
+    print()
+    with suppress(Exception):
+        print(f"|| {len(http_valid_proxies)} of {len(http_proxies)} ({http_percentage:.2f}%) HTTP proxies are currently active.")
+    with suppress(Exception):
+        print(f"|| {len(https_valid_proxies)} of {len(https_proxies)} ({https_percentage:.2f}%) HTTPS proxies are currently active.")
     exit_con()
 
 def exit_con():

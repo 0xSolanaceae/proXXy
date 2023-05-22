@@ -421,6 +421,8 @@ def scraping_handler(error_log, site, timeout):
     #print(f"|| {len(https_valid_proxies)} of {len(https_proxies)} ({https_percentage:.2f}%) HTTPS proxies are currently active.")
 
         print()
+        banner()
+        print(vanity_line)
         with suppress(Exception):
             print(f"|| {len(http_valid_proxies)} of {len(http_proxies)} ({http_percentage:.2f}%) HTTP proxies are currently active.")
         with suppress(Exception):

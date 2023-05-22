@@ -344,8 +344,9 @@ def scrape_url(url, proxy_type, error_log):
                     file_https.write(scraped_data + '\n')
         else:
             error_log.write(f"Could not access: {url}\n")
-    except Exception:
-        error_log.write(f"Could not access: {url}\n")
+    except Exception as e:
+        error_log.write(f"Could not access: {url}")
+        error_log.write(f"Error message: {str(e)}\n")
 
 def scraping_handler(error_log, site, timeout):
     import tqdm

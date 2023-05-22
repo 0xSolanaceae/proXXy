@@ -427,6 +427,8 @@ def scraping_handler(error_log, site, timeout):
             checking_handler(site, timeout, protocol, rand_UA)
 
         print()
+        banner()
+        print(vanity_line)
         with suppress(Exception):
             print(f"|| {len(http_valid_proxies)} of {len(http_proxies)} ({http_percentage:.2f}%) HTTP proxies are currently active.")
         with suppress(Exception):

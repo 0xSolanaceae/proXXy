@@ -319,7 +319,7 @@ def HTTPS_check(site, timeout, rand_UA):
 
     https_percentage = len(https_valid_proxies) / len(https_proxies) * 100
 
-    for thread in threads: #tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
+    for thread in tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
         thread.join()
 
     with open(PROXY_LIST_FILE, 'w') as f:
@@ -431,6 +431,7 @@ def prox_check_handler(protocols, site, timeout):
         checking_handler(site, timeout, protocol, rand_UA)
 
     print()
+    input("Press enter to continue... ")
     banner()
     print(vanity_line)
     with suppress(Exception):

@@ -386,7 +386,7 @@ def scraping_handler(error_log, site, timeout):
         print(" " * left_space + error + " " * right_space)
         exit_con()
     elif accessed_sources < total_sources:
-        error = "|| Some sources may be blocked, please ensure your network connection is not censored. ||"
+        error = "|| Some sources could not be accessed, please check the logfile for more details. ||"
 
         empty_space = terminal_width - len(error)
         left_space = empty_space // 2
@@ -428,6 +428,18 @@ def scraping_handler(error_log, site, timeout):
         with suppress(Exception):
             print(f"|| {len(https_valid_proxies)} of {len(https_proxies)} ({https_percentage:.2f}%) HTTPS proxies are currently active.")
     exit_con()
+
+def prox_check_handler(protocols, site, timeout):
+    for protocol in protocols:
+        checking_handler(site, timeout, protocol, rand_UA)
+
+    print()
+    banner()
+    print(vanity_line)
+    with suppress(Exception):
+        print(f"|| {len(http_valid_proxies)} of {len(http_proxies)} ({http_percentage:.2f}%) HTTP proxies are currently active.")
+    with suppress(Exception):
+        print(f"|| {len(https_valid_proxies)} of {len(https_proxies)} ({https_percentage:.2f}%) HTTPS proxies are currently active.")
 
 def exit_con():
     text = "||     Thank you for using proXXy.     ||"

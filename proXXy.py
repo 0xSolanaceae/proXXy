@@ -433,7 +433,6 @@ def prox_check_handler(protocols, site, timeout):
     for protocol in protocols:
         checking_handler(site, timeout, protocol, rand_UA)
 
-    print()
     print(vanity_line)
     print()
     input("Press enter to continue... ")

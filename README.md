@@ -75,7 +75,7 @@ python3 proXXy.py -u
 - Added a function to regularize proxies by removing trash values.
 - Updated the proxy scraping function to use contextlib.suppress for better error handling.
 
-![img](https://github.com/Atropa-Solanaceae/proXXy/assets/89823371/109f24c2-7385-4601-824c-2aaa0dc6f76d)
+![img](https://github.com/Atropa-Solanaceae/proXXy/assets/89823371/193b1828-bc9f-4c99-8f6a-f16238e9a888)
 
 ## License
 

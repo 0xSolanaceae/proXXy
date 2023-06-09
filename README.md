@@ -48,7 +48,7 @@ python3 proXXy.py
 
 The program will output three files in the project directory containing the regularized proxy lists: `HTTP.txt`, `HTTPS.txt`, `SOCKS4.txt`, and `SOCKS5.txt`, along with an error output file titled `error.log` noting the links that were unable to be accessed.
 
-## Update
+## Updating
 
 To update the project, run:
 ```
@@ -74,6 +74,12 @@ python3 proXXy.py -u
 - Added a function to remove duplicate proxies from the generated lists.
 - Added a function to regularize proxies by removing trash values.
 - Updated the proxy scraping function to use contextlib.suppress for better error handling.
+
+## Support
+
+Need help and can't get it to run correctly? Open an issue or contact me on discord at https://atropa-solanaceae.github.io/
+
+---
 
 ![img](https://github.com/Atropa-Solanaceae/proXXy/assets/89823371/193b1828-bc9f-4c99-8f6a-f16238e9a888)
 

@@ -77,7 +77,7 @@ python3 proXXy.py -u
 
 ## Support
 
-Need help and can't get it to run correctly? Open an issue or contact me on discord at https://atropa-solanaceae.github.io/
+Need help and can't get it to run correctly? Open an issue or contact me [here](https://atropa-solanaceae.github.io/)
 
 ---
 

@@ -13,7 +13,7 @@ from threading import Thread
 from contextlib import suppress
 from subprocess import run
 from bs4 import BeautifulSoup
-from pystyle import Colors, Colorate, Center
+from pystyle import Colors, Colorate
 
 def proxy_sources():
     return {
@@ -121,12 +121,13 @@ def banner():
 ▀███████████ ███    ███ ███      ▀███████████ ███   ███ ▀███████████ ███        ▀▀███▀▀▀     ▀███████████ ▀▀███▀▀▀     
          ███ ███    ███ ███        ███    ███ ███   ███   ███    ███ ███    █▄    ███    █▄    ███    ███   ███    █▄  
    ▄█    ███ ███    ███ ███▌    ▄  ███    ███ ███   ███   ███    ███ ███    ███   ███    ███   ███    ███   ███    ███ 
- ▄████████▀   ▀██████▀  █████▄▄██  ███    █▀   ▀█   █▀    ███    █▀  ████████▀    ██████████   ███    █▀    ██████████ """
+ ▄████████▀   ▀██████▀  █████▄▄██  ███    █▀   ▀█   █▀    ███    █▀  ████████▀    ██████████   ███    █▀    ██████████"""
 
     system("title proXXy -- by Solanaceae")
     system('cls' if name == 'nt' else 'clear')
-    print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, banner, 1)))
+    print((Colorate.Vertical(Colors.purple_to_blue, banner, 1)))
     print()
+    
 
 def parameters():
     global rand_UA

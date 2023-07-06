@@ -46,7 +46,14 @@ python3 proXXy.py
 
 - Allow the program to complete, then check the new text files located in `scraped/` directory! (After each instance of the checking process, allow the program time to join threads before moving on to the next proxy protocol.)
 
-The program will output three files in the project directory containing the regularized proxy lists: `HTTP.txt`, `HTTPS.txt`, `SOCKS4.txt`, and `SOCKS5.txt`, along with an error output file titled `error.log` noting the links that were unable to be accessed.
+The program will output three files in the project directory containing the regularized proxy lists: 
+
+- `HTTP.txt`
+- `HTTPS.txt`
+- `SOCKS4.txt`
+- `SOCKS5.txt`
+
+along with an error output file titled `error.log` noting the links that were unable to be accessed.
 
 ## Updating
 

@@ -51,6 +51,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/http.txt",
             "https://raw.githubusercontent.com/prxchk/proxy-list/main/http.txt",
             "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/http.txt",
+            "https://raw.githubusercontent.com/zloi-user/hideip.me/main/http.txt",
         ],
         "SOCKS4": [
             "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks4",
@@ -76,6 +77,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/socks4.txt",
             "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks4.txt",
             "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks4.txt",
+            "https://raw.githubusercontent.com/zloi-user/hideip.me/main/socks4.txt"
         ],
         "SOCKS5": [
             "https://raw.githubusercontent.com/B4RC0DE-TM/proxy-list/main/SOCKS5.txt",
@@ -102,6 +104,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks5.txt",
             "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks5.txt",
             "https://spys.me/socks.txt",
+            "https://raw.githubusercontent.com/zloi-user/hideip.me/main/socks5.txt"
         ],
         "HTTPS": [
             "http://sslproxies.org",
@@ -109,6 +112,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/https.txt",
             "https://raw.githubusercontent.com/HyperBeats/proxy-list/main/https.txt",
             "https://proxyspace.pro/https.txt",
+            "https://raw.githubusercontent.com/zloi-user/hideip.me/main/https.txt",
         ]
     }
 

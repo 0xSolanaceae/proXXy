@@ -17,104 +17,19 @@ from pystyle import Colors, Colorate
 
 
 def proxy_sources():
+    with open('proxy_sources/http.txt', 'r') as fi:
+        http = fi.read().splitlines()
+    with open('proxy_sources/https.txt', 'r') as fi:
+        https = fi.read().splitlines()
+    with open('proxy_sources/socks4.txt', 'r') as fi:
+        socks4 = fi.read().splitlines()
+    with open('proxy_sources/socks5.txt', 'r') as fi:
+        socks5 = fi.read().splitlines()
     return {
-        "HTTP": [
-            "https://raw.githubusercontent.com/B4RC0DE-TM/proxy-list/main/HTTP.txt",
-            "https://raw.githubusercontent.com/saschazesiger/Free-Proxies/master/proxies/http.txt",
-            "https://raw.githubusercontent.com/HyperBeats/proxy-list/main/http.txt",
-            "https://raw.githubusercontent.com/mmpx12/proxy-list/master/http.txt",
-            "https://api.proxyscrape.com/?request=displayproxies&proxytype=http",
-            "https://api.openproxylist.xyz/http.txt",
-            "http://alexa.lr2b.com/proxylist.txt",
-            "https://multiproxy.org/txt_all/proxy.txt",
-            "https://proxyspace.pro/http.txt",
-            "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/http.txt",
-            "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies_anonymous/http.txt",
-            "https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/http.txt",
-            "https://raw.githubusercontent.com/shiftytr/proxy-list/master/proxy.txt",
-            "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt",
-            "https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/http.txt",
-            "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-http.txt",
-            "https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt",
-            "https://raw.githubusercontent.com/sunny9577/proxy-scraper/master/proxies.txt",
-            "https://raw.githubusercontent.com/roosterkid/openproxylist/main/HTTPS_RAW.txt",
-            "https://raw.githubusercontent.com/opsxcq/proxy-list/master/list.txt",
-            "https://raw.githubusercontent.com/proxy4parsing/proxy-list/main/http.txt",
-            "http://rootjazz.com/proxies/proxies.txt",
-            "http://spys.me/proxy.txt",
-            "https://proxyspace.pro/http.txt",
-            "https://www.proxy-list.download/api/v1/get?type=http",
-            "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies/http.txt",
-            "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies_anonymous/http.txt",
-            "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/http.txt",
-            "https://sunny9577.github.io/proxy-scraper/proxies.txt",
-            "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/http.txt",
-            "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/http.txt",
-            "https://raw.githubusercontent.com/prxchk/proxy-list/main/http.txt",
-            "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/http.txt",
-            "https://raw.githubusercontent.com/zloi-user/hideip.me/main/http.txt",
-        ],
-        "SOCKS4": [
-            "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks4",
-            "https://api.proxyscrape.com/?request=displayproxies&proxytype=socks4&country=all",
-            "https://api.openproxylist.xyz/socks4.txt",
-            "https://proxyspace.pro/socks4.txt",
-            "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks4.txt",
-            "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies_anonymous/socks4.txt",
-            "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks4.txt",
-            "https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/socks4.txt",
-            "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt",
-            "https://raw.githubusercontent.com/roosterkid/openproxylist/main/SOCKS4_RAW.txt",
-            "https://proxyspace.pro/socks4.txt",
-            "https://www.proxy-list.download/api/v1/get?type=socks4",
-            "https://raw.githubusercontent.com/HyperBeats/proxy-list/main/socks4.txt",
-            "https://raw.githubusercontent.com/mmpx12/proxy-list/master/socks4.txt",
-            "https://raw.githubusercontent.com/saschazesiger/Free-Proxies/master/proxies/socks4.txt",
-            "https://raw.githubusercontent.com/B4RC0DE-TM/proxy-list/main/SOCKS4.txt",
-            "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies/socks4.txt",
-            "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies_anonymous/socks4.txt",
-            "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/socks4.txt",
-            "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks4.txt",
-            "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/socks4.txt",
-            "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks4.txt",
-            "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks4.txt",
-            "https://raw.githubusercontent.com/zloi-user/hideip.me/main/socks4.txt"
-        ],
-        "SOCKS5": [
-            "https://raw.githubusercontent.com/B4RC0DE-TM/proxy-list/main/SOCKS5.txt",
-            "https://raw.githubusercontent.com/saschazesiger/Free-Proxies/master/proxies/socks5.txt",
-            "https://raw.githubusercontent.com/mmpx12/proxy-list/master/socks5.txt",
-            "https://raw.githubusercontent.com/HyperBeats/proxy-list/main/socks5.txt",
-            "https://api.openproxylist.xyz/socks5.txt",
-            "https://api.proxyscrape.com/?request=displayproxies&proxytype=socks5",
-            "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks5",
-            "https://proxyspace.pro/socks5.txt",
-            "https://raw.githubusercontent.com/manuGMG/proxy-365/main/SOCKS5.txt",
-            "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks5.txt",
-            "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies_anonymous/socks5.txt",
-            "https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/socks5.txt",
-            "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks5.txt",
-            "https://raw.githubusercontent.com/roosterkid/openproxylist/main/SOCKS5_RAW.txt",
-            "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt",
-            "https://raw.githubusercontent.com/hookzof/socks5_list/master/proxy.txt",
-            "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies/socks5.txt",
-            "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies_anonymous/socks5.txt",
-            "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/socks5.txt",
-            "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks5.txt",
-            "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/socks5.txt",
-            "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks5.txt",
-            "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks5.txt",
-            "https://spys.me/socks.txt",
-            "https://raw.githubusercontent.com/zloi-user/hideip.me/main/socks5.txt"
-        ],
-        "HTTPS": [
-            "http://sslproxies.org",
-            "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-https.txt",
-            "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/https.txt",
-            "https://raw.githubusercontent.com/HyperBeats/proxy-list/main/https.txt",
-            "https://proxyspace.pro/https.txt",
-            "https://raw.githubusercontent.com/zloi-user/hideip.me/main/https.txt",
-        ]
+        'HTTP': http,
+        'HTTPS': https,
+        'SOCKS4': socks4,
+        'SOCKS5': socks5,
     }
 
 

@@ -1,17 +1,17 @@
 #!/usr/bin/python3
-#Coded by Solanaceae
-import os
-import re
-import shutil
-import socket
-import random
-import requests
-import warnings
-import platform
-import argparse
-import threading
-import contextlib
-import subprocess
+# Built by Solanaceae -- https://solanaceae.xyz/
+from os import name, system
+from re import findall
+from shutil import get_terminal_size
+from socket import timeout as socket_timeout
+from random import choice
+from requests import get, exceptions
+from warnings import filterwarnings
+from platform import system as platform_system
+from argparse import ArgumentParser, ArgumentError, ArgumentTypeError
+from threading import Thread
+from contextlib import suppress
+from subprocess import run
 from bs4 import BeautifulSoup
 from pystyle import *
 
@@ -132,7 +132,6 @@ def banner():
     print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, banner, 1)))
     print()
     
-
 def parameters():
     global rand_UA
     global timeout
@@ -141,7 +140,10 @@ def parameters():
 
     try:
         banner()
-        prox_check_input = input("Would you like to check proxies? (Y/n): ").lower()
+        try:
+            prox_check_input = input("Would you like to check proxies? (Y/n): ").lower()
+        except KeyboardInterrupt:
+            exit_con()
         if prox_check_input == "":
             raise Exception
         prox_check = prox_check_input.lower() != "n"
@@ -151,7 +153,10 @@ def parameters():
     if prox_check:
         try:
             banner()
-            rand_UA_input = input("Would you like to use random user agents? (Y/n): ").lower()
+            try:
+                rand_UA_input = input("Would you like to use random user agents? (Y/n): ").lower()
+            except KeyboardInterrupt:
+                exit_con()
             if rand_UA_input == "":
                 raise Exception
             rand_UA = rand_UA_input.lower() != "n"
@@ -160,7 +165,10 @@ def parameters():
 
         try:
             banner()
-            timeout_input = input("How long should the request timeout be? (Default is 10 seconds, cannot be lower than 5): ")
+            try:
+                timeout_input = input("How long should the request timeout be? (Default is 10 seconds, cannot be lower than 5): ")
+            except KeyboardInterrupt:
+                exit_con()
             if timeout_input == "":
                 raise Exception
             timeout_input = int(timeout_input)
@@ -184,11 +192,10 @@ def parameters():
     if timeout is not None:
         print(f" -- Timeout: {timeout}")
     confirm_input = input("\nDo you want to continue? (Y/n): ").lower()
-
     # Check user's confirmation
     if confirm_input == "n":
-        parameters()
-
+        exit_con()
+    main(rand_UA, timeout, prox_check)
 ## proxy processing
 
 def remove_duplicate_proxies(protocol):
@@ -456,10 +463,11 @@ def exit_con():
     left_space = empty_space // 2
     right_space = empty_space - left_space
 
+    banner()
     print(vanity_line)
     print(" " * left_space + text + " " * right_space)
     print(vanity_line)
-    exit()
+    exit(1)
 
 def checking_handler(site, timeout, protocol, rand_UA):
     if protocol == "SOCKS4":
@@ -475,22 +483,14 @@ def checking_handler(site, timeout, protocol, rand_UA):
         with contextlib.suppress(Exception):
             HTTPS_check(site, timeout, rand_UA)
 
-def init_main(error_log, site, timeout):
-    try: 
-        scraping_handler(error_log, site, timeout)
-    except KeyboardInterrupt:
-        os.system('cls' if os.name == 'nt' else 'clear')
-        exit_con()
-
-def main():
+def main(rand_UA, timeout, prox_check):
     try:
-        parameters()
-        intro()
-        warnings.filterwarnings("ignore", category=UserWarning, message=".*looks like you're parsing an XML document using an HTML parser.*")
+        banner()
+        filterwarnings("ignore", category=UserWarning, message=".*looks like you're parsing an XML document using an HTML parser.*")
         site = "http://httpbin.org/ip"
         # initialize files
         with open("scraped/HTTP.txt", "w"), open("scraped/SOCKS4.txt", "w"), open("scraped/SOCKS5.txt", "w"), open("scraped/HTTPS.txt", "w"), open("error.log", "w") as error_log:
-            init_main(error_log, site, timeout)
+            scraping_handler(error_log, site, timeout)
     except KeyboardInterrupt:
         os.system('cls' if os.name == 'nt' else 'clear')
         exit_con()
@@ -514,26 +514,68 @@ def run_update_script():
 
     exit_con()
 
-if __name__ == '__main__':
-    global vanity_line
-    global total_sources
-    global accessed_sources
+def validate_positive_integer(value):
+    try:
+        int_value = int(value)
+        if int_value < 5:
+            raise ArgumentTypeError("Timeout cannot be lower than 5 seconds.")
+        return int_value
+    except ValueError as e:
+        raise ArgumentTypeError("Timeout must be a positive integer.") from e
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-u', action='store_true', help='Run update script')
+if __name__ == '__main__':
+    parser = ArgumentParser(description='A super simple multithreaded proxy scraper; scraping & checking ~50k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.')
+    parser.add_argument('-u', '--update', action='store_true', help='Update project')
+    parser.add_argument('-v', '--validate', choices=['T', 'F'], help='Validate proxies (T/F)')
+    parser.add_argument('-r', '--random-UA', choices=['T', 'F'], help='Use random user agents (T/F)')
+    parser.add_argument('-t', '--timeout', type=validate_positive_integer, help='Set the number of seconds for the default timeout (cannot be lower than 5 seconds)')
+    parser.add_argument('-y', action='store_true', help='Continue without prompts')
+
     args = parser.parse_args()
 
-    terminal_width = shutil.get_terminal_size().columns
-
+    terminal_width = get_terminal_size().columns
     dash = "—"
     dashes = dash * (terminal_width - 2)
     vanity_line = f"<{dashes}>"
 
-    if args.u:
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print(vanity_line)
-        run_update_script()
+    try:
+        if not any(vars(args).values()):
+            parameters()
+        elif args.update:
+            system('cls' if name == 'nt' else 'clear')
+            print(vanity_line)
+            run_update_script()
+        else:
+            rand_UA = args.random_UA == 'T'
+            timeout = args.timeout
+            prox_check = args.validate == 'T'
 
-    total_sources = 0
-    accessed_sources = 0
-    main()
+            if args.validate == 'F':
+                # If -v is set to F, -r and -t can be omitted
+                if args.random_UA or args.timeout:
+                    print("Error: If you use -vF, you cannot provide -r or -t.")
+                    exit(1)
+            elif any([args.random_UA, args.timeout]) and not all([args.random_UA, args.timeout]):
+                print("Error: If you use -vT, you must provide -r and -t flags.")
+                exit(1)
+
+            if args.y:
+                main(rand_UA, timeout, prox_check)
+                exit(1)
+
+            print(vanity_line)
+            print(f"Selected option(s):\n\n -- Proxy check: {prox_check}")
+            print(f" -- Random user agents: {rand_UA}")
+            print(f" -- Timeout: {timeout}")
+            print(vanity_line)
+            confirm_input = input("\nDo you want to continue? (Y/n): ").lower()
+            # Check user's confirmation
+            if confirm_input == "n":
+                exit(1)
+            main(rand_UA, timeout, prox_check)
+
+    except ArgumentError:
+        parser.print_help()
+    except KeyboardInterrupt:
+        exit_con()
+4

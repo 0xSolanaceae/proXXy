@@ -24,12 +24,10 @@ def proxy_sources():
             "https://raw.githubusercontent.com/mmpx12/proxy-list/master/http.txt",
             "https://api.proxyscrape.com/?request=displayproxies&proxytype=http",
             "https://api.openproxylist.xyz/http.txt",
-            "http://alexa.lr2b.com/proxylist.txt",
+            "https://alexa.lr2b.com/proxylist.txt",
             "https://multiproxy.org/txt_all/proxy.txt",
-            "https://proxyspace.pro/http.txt",
             "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/http.txt",
             "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies_anonymous/http.txt",
-            "https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/http.txt",
             "https://raw.githubusercontent.com/shiftytr/proxy-list/master/proxy.txt",
             "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt",
             "https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/http.txt",
@@ -39,8 +37,8 @@ def proxy_sources():
             "https://raw.githubusercontent.com/roosterkid/openproxylist/main/HTTPS_RAW.txt",
             "https://raw.githubusercontent.com/opsxcq/proxy-list/master/list.txt",
             "https://raw.githubusercontent.com/proxy4parsing/proxy-list/main/http.txt",
-            "http://rootjazz.com/proxies/proxies.txt",
-            "http://spys.me/proxy.txt",
+            "https://rootjazz.com/proxies/proxies.txt",
+            "https://spys.me/proxy.txt",
             "https://proxyspace.pro/http.txt",
             "https://www.proxy-list.download/api/v1/get?type=http",
             "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies/http.txt",
@@ -52,6 +50,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/prxchk/proxy-list/main/http.txt",
             "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/http.txt",
             "https://raw.githubusercontent.com/zloi-user/hideip.me/main/http.txt",
+            "https://www.proxyscan.io/download?type=http",
         ],
         "SOCKS4": [
             "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks4",
@@ -77,7 +76,8 @@ def proxy_sources():
             "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/socks4.txt",
             "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks4.txt",
             "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks4.txt",
-            "https://raw.githubusercontent.com/zloi-user/hideip.me/main/socks4.txt"
+            "https://raw.githubusercontent.com/zloi-user/hideip.me/main/socks4.txt",
+            "https://www.proxyscan.io/download?type=socks4,"
         ],
         "SOCKS5": [
             "https://raw.githubusercontent.com/B4RC0DE-TM/proxy-list/main/SOCKS5.txt",

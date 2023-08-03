@@ -12,7 +12,7 @@
   </p>
   
   <p align="center">
-    The software is currently capable of retrieving over 80,000 proxies from many different sources.
+    The software is currently capable of retrieving over 50,000 proxies from many different sources.
   </p>
   
   <p align="center">
@@ -77,14 +77,14 @@ python3 proXXy.py [flags]
 
 1. `-v[T/F], --validate`: Use this flag to enable proxy validation. The scraper will attempt to validate the scraped proxies by checking their accessibility.
 
-2. `-th [int], --threads`: This flag allows you to set the number of threads to use. The default value is 100 threads.
+2. `-r[T/F], --random-UA`: By including this flag, proXXy will use random user agents for each request, making it harder for servers to detect the scraper.
 
-3. `-ti [int], --timeout`: This flag allows you to set the default timeout for proXXy. The timeout specifies the number of seconds the scraper will wait for a response before considering a request as failed. The minimum timeout value is 10 seconds.
+3. `-t[int], --timeout`: This flag allows you to set the default timeout for proXXy. The timeout specifies the number of seconds the scraper will wait for a response before considering a request as failed. The minimum timeout value is 10 seconds.
 
 ### Example
 
 ```
-python3 proXXy.py -vT -th 100 -ti 10
+python3 proXXy.py -vT -rF -t10
 ```
 
 4. `-y`: This flag allows you to skip the prompts and run proXXy with the given parameters. (Make sure you know what you're doing!)
@@ -92,7 +92,7 @@ python3 proXXy.py -vT -th 100 -ti 10
 ### Example
 
 ```
-python3 proXXy.py -vT -th 100 -ti 10 -y
+python3 proXXy.py -vT -rF -t10 -y
 ```
 
 5. `-u, --update`: This flag is used to update the project. When provided alone, it will trigger the update process, ensuring you have the latest version of proXXy.
@@ -102,25 +102,25 @@ python3 proXXy.py -vT -th 100 -ti 10 -y
 Remember to utilize the `-h` flag whenever you need a quick reference to the available flags and how to use them. The help message will be displayed as follows:
 
 ```
-usage: proXXy.py [-h] [-u] [-v {T,F}] [-th THREADS] [-ti TIMEOUT] [-y]
+Usage: proXXy.py [-h] [-u] [-v {T,F}] [-r {T,F}] [-t TIMEOUT] [-y]
 
-A super simple multithreaded proxy scraper; scraping & checking ~80k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.
+A super simple multithreaded proxy scraper; scraping & checking ~50k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.
 
 options:
   -h, --help            show this help message and exit
-  -u, --update          update project
+  -u, --update          Update project
   -v {T,F}, --validate {T,F}
-                        validate proxies (T/F)
-  -th THREADS, --threads THREADS
-                        number of threads to use, default is 100
-  -ti TIMEOUT, --timeout TIMEOUT
-                        set the number of seconds for the default timeout (cannot be lower than 5 seconds) 
-  -y                    continue without prompts
+                        Validate proxies (T/F)
+  -r {T,F}, --random-UA {T,F}
+                        Use random user agents (T/F)
+  -t TIMEOUT, --timeout TIMEOUT
+                        Set the number of seconds for the default timeout (cannot be lower than 5 seconds) 
+  -y                    Continue without prompts
 ```
 
 ## Notes
 
-- The combination of flags `-v`, `-th`, and `-ti` is allowed. However, if `-v` is set to "F" (disabled), the other flags `-th` and `-ti` are not allowed.
+- The combination of flags `-v`, `-r`, and `-t` is allowed. However, if `-v` is set to "F" (disabled), the other flags `-r` and `-t` are not allowed.
 
 - If you choose to enable proxy validation (`-v` flag), proXXy will display information about the total number of sources and the number of accessed sources after the validation process is completed.
 
@@ -128,7 +128,6 @@ options:
 
 ## Planned Features
 
-- Migrate to asyncio for faster scraping.
 - Implement a feature for automatically testing the scraped proxies to verify their functionality. (2/4th completed)
 - Proxy sorting instead of hardcoding.
 - Provide an option to discern between Elite, Anonymous, and Transparent anonymity classes of proxies.
@@ -139,7 +138,7 @@ Need help and can't get it to run correctly? Open an issue or contact me [here](
 
 ---
 
-![proXXy](https://github.com/Atropa-Solanaceae/proXXy/assets/89823371/60cbd286-8aa0-4229-a1f4-b3e6ae6db47e)
+![img](https://github.com/Atropa-Solanaceae/proXXy/assets/89823371/193b1828-bc9f-4c99-8f6a-f16238e9a888)
 
 ## License
 

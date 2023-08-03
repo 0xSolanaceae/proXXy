@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 # Built by Solanaceae -- https://solanaceae.xyz/
+from sys import argv
 from re import findall
 from random import choice
 from subprocess import run
@@ -588,44 +589,29 @@ if __name__ == '__main__':
     vanity_line = f"<{dashes}>"
 
     try:
-        import sys  # FIXME
-        if len(sys.argv) == 1:
+        if len(argv) == 1:
             parameters()
         elif args.update:
             system('cls' if name == 'nt' else 'clear')
             print(vanity_line)
             run_update_script()
         else:
-            timeout = args.timeout
-            threads = args.threads
-            prox_check = args.validate == 'T'
-
-            if args.validate == 'F':
-                # If -v is set to F, we proceed without checking -th and -ti
-                timeout = 10
-                # Check if only -y is provided as an argument
-                if len(sys.argv) > 2 or not args.y:
-                    print("Error: If you use -vF, no other parameters are allowed except -y.")
-                    exit(1)
-            elif args.validate == 'T' and (args.threads is None or args.timeout is None):
+            if args.validate == 'T' and (args.threads is None or args.timeout is None):
                 print("Error: If you use -vT, you must provide -th and -ti flags.")
                 exit(1)
 
-            if args.y:
-                main(timeout)
-                exit(1)
-
-            print(vanity_line)
-            print(f"Selected options:\n")
-            print(f" -- Proxy check: {prox_check}")
-            print(f" -- Threads: {threads or 100}")
-            print(f" -- Timeout: {timeout}")
-            print(vanity_line)
-            confirm_input = input("\nDo you want to continue? (Y/n): ").lower()
-            # Check user's confirmation
-            if confirm_input == "n":
-                exit(1)
-            main(timeout)
+            if args.validate == 'T' and not args.y:
+                print(vanity_line)
+                print(f"Selected options:\n")
+                print(f" -- Proxy check: {args.validate == 'T'}")
+                print(f" -- Threads: {args.threads or 100}")
+                print(f" -- Timeout: {args.timeout or 10}")
+                print(vanity_line)
+                confirm_input = input("\nDo you want to continue? (Y/n): ").lower()
+                # Check user's confirmation
+                if confirm_input == "n":
+                    exit(1)
+            main(args.timeout)
     except ArgumentError:
         parser.print_help()
     except KeyboardInterrupt:

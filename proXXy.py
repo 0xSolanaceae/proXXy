@@ -1,20 +1,19 @@
 #!/usr/bin/python3
 # Built by Solanaceae -- https://solanaceae.xyz/
-from sys import argv
-from re import findall
-from random import choice
-from subprocess import run
 from os import name, system
-from threading import Thread
-from bs4 import BeautifulSoup
-from contextlib import suppress
-from warnings import filterwarnings
+from re import findall
 from shutil import get_terminal_size
-from pystyle import Colors, Colorate
-from requests import get, exceptions
-from platform import system as platform_system
 from socket import timeout as socket_timeout
+from random import choice
+from requests import get, exceptions
+from warnings import filterwarnings
+from platform import system as platform_system
 from argparse import ArgumentParser, ArgumentError, ArgumentTypeError
+from threading import Thread
+from contextlib import suppress
+from subprocess import run
+from bs4 import BeautifulSoup
+from pystyle import Colors, Colorate
 
 def proxy_sources():
     return {
@@ -52,7 +51,6 @@ def proxy_sources():
             "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/http.txt",
             "https://raw.githubusercontent.com/zloi-user/hideip.me/main/http.txt",
             "https://www.proxyscan.io/download?type=http",
-            "https://github.com/Bardiafa/Proxy-Leecher/blob/main/proxies.txt" #all types of proxies, but most of HTTP. Will fix once sorting is implemented
         ],
         "SOCKS4": [
             "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks4",
@@ -65,6 +63,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/socks4.txt",
             "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt",
             "https://raw.githubusercontent.com/roosterkid/openproxylist/main/SOCKS4_RAW.txt",
+            "https://proxyspace.pro/socks4.txt",
             "https://www.proxy-list.download/api/v1/get?type=socks4",
             "https://raw.githubusercontent.com/HyperBeats/proxy-list/main/socks4.txt",
             "https://raw.githubusercontent.com/mmpx12/proxy-list/master/socks4.txt",
@@ -134,6 +133,7 @@ def banner():
     print()
     
 def parameters():
+    global rand_UA
     global timeout
     global prox_check
     global user_agents
@@ -154,6 +154,18 @@ def parameters():
         try:
             banner()
             try:
+                rand_UA_input = input("Would you like to use random user agents? (Y/n): ").lower()
+            except KeyboardInterrupt:
+                exit_con()
+            if rand_UA_input == "":
+                raise Exception
+            rand_UA = rand_UA_input.lower() != "n"
+        except Exception:
+            rand_UA = True
+
+        try:
+            banner()
+            try:
                 timeout_input = input("How long should the request timeout be? (Default is 10 seconds, cannot be lower than 5): ")
             except KeyboardInterrupt:
                 exit_con()
@@ -163,41 +175,27 @@ def parameters():
             timeout = timeout_input if timeout_input >= 5 else 10
         except Exception:
             timeout = 10
-
-        try:
-            banner()
-            try:
-                threads_input = input("How many threads should be used? (Default is 100): ")
-            except KeyboardInterrupt:
-                exit_con()
-            if threads_input == "":
-                raise Exception
-            threads_input = int(threads_input)
-        except Exception:
-            threads = 100
     else:
         timeout = None
-        threads = None
-    
+        rand_UA = None
 
-    user_agents = []
-    with open("user_agents.txt", "r") as file:
-        user_agents = file.read().splitlines()
+    if rand_UA:
+        user_agents = []
+        with open("user_agents.txt", "r") as file:
+            user_agents = file.read().splitlines()
 
     # Confirmation prompt
     banner()
-    print(f"Selected options:\n")
-    print(f" -- Proxy check: {prox_check}")
+    print(f"Selected option(s):\n\n -- Proxy check: {prox_check}")
+    if rand_UA is not None:
+        print(f" -- Random user agents: {rand_UA}")
     if timeout is not None:
         print(f" -- Timeout: {timeout}")
-    if threads is not None:
-        print(f" -- Threads: {threads}")
     confirm_input = input("\nDo you want to continue? (Y/n): ").lower()
     # Check user's confirmation
     if confirm_input == "n":
         exit_con()
-    main(timeout)
-
+    main(rand_UA, timeout, prox_check)
 ## proxy processing
 
 def remove_duplicate_proxies(protocol):
@@ -250,13 +248,13 @@ def regularize_proxies(protocol):
 
 ## checking portion
 
-def SOCKS4_check(site, timeout, threads):
-    pass
-    
-def SOCKS5_check(site, timeout, threads):
+def SOCKS4_check(site, timeout, rand_UA):
     pass
 
-def HTTP_check(site, timeout):
+def SOCKS5_check(site, timeout, rand_UA):
+    pass
+
+def HTTP_check(site, timeout, rand_UA):
     from tqdm import tqdm
     global http_valid_proxies
     global http_proxies
@@ -269,8 +267,11 @@ def HTTP_check(site, timeout):
     def test_proxy(proxy, results):
         with contextlib.suppress(requests.exceptions.RequestException, socket.timeout):
             headers = {}
-            headers['User-Agent'] = choice(user_agents)
-        
+            if rand_UA:
+                headers['User-Agent'] = choice(user_agents)
+            else:
+                headers['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/37.0.2062.94 Chrome/37.0.2062.94 Safari/537.36'
+
             response = get(TEST_URL, proxies={'http': proxy}, headers=headers, timeout=TIMEOUT)
             if response.status_code == 200:
                 results.append(proxy)
@@ -293,7 +294,7 @@ def HTTP_check(site, timeout):
         for proxy in http_valid_proxies:
             f.write(proxy + '\n')
     
-def HTTPS_check(site, timeout):
+def HTTPS_check(site, timeout, rand_UA):
     from tqdm import tqdm
     global https_valid_proxies
     global https_proxies
@@ -306,7 +307,10 @@ def HTTPS_check(site, timeout):
     def test_proxy(proxy, results):
         with contextlib.suppress(requests.exceptions.RequestException, socket.timeout):
             headers = {}
-            headers['User-Agent'] = choice(user_agents)
+            if rand_UA:
+                headers['User-Agent'] = choice(user_agents)
+            else:
+                headers['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/37.0.2062.94 Chrome/37.0.2062.94 Safari/537.36'
 
             response = requests.get(TEST_URL, proxies={'https': proxy}, headers=headers, timeout=TIMEOUT)
             if response.status_code == 200:
@@ -399,7 +403,6 @@ def scraping_handler(error_log, site, timeout):
         print(vanity_line)
         print(" " * left_space + error + " " * right_space)
         exit_con()
-
     elif accessed_sources < total_sources:
         error = "|| Some sources could not be accessed, please check the logfile for more details. ||"
 
@@ -425,82 +428,25 @@ def scraping_handler(error_log, site, timeout):
         regularize_proxies(protocol)
     for protocol in tqdm.tqdm(protocols, desc="Removing Duplicates", ascii=" #", unit= " prox"):
         remove_duplicate_proxies(protocol)
+    print()
 
     if prox_check:
-        print()
         prox_check_handler(protocols, site, timeout)
-    else:
-        non_check_closure()
+    exit_con()
 
-def non_check_closure():
-    with (open("scraped/HTTP.txt", "r") as file_http, open("scraped/HTTPS.txt", "r") as file_https, open("scraped/SOCKS4.txt", "r") as file_socks4, open("scraped/SOCKS5.txt", "r") as file_socks5):
-        http_scraped = len(file_http.readlines())
-        https_scraped = len(file_https.readlines())
-        socks4_scraped = len(file_socks4.readlines())
-        socks5_scraped = len(file_socks5.readlines())
-    print(vanity_line)
-    print(f"|| {socks4_scraped:,} SOCKS4 proxies scraped.")
-    print(f"|| {socks5_scraped:,} SOCKS5 proxies scraped.")
-    print(f"|| {http_scraped:,} HTTP proxies scraped.")
-    print(f"|| {https_scraped:,} HTTPS proxies scraped.")
-    total = http_scraped + https_scraped + socks4_scraped + socks5_scraped
-    print(f"|| Total proxies scraped: {total:,}.")
-
-    text = "||     Thank you for using proXXy.     ||"
-
-    # Calculate the remaining empty space on the left and right
-    empty_space = terminal_width - len(text)
-    left_space = empty_space // 2
-    right_space = empty_space - left_space
-
-    print(vanity_line)
-    print(" " * left_space + text + " " * right_space)
-    print(vanity_line)
-    exit(1)
-    
 def prox_check_handler(protocols, site, timeout):
-    global http_scraped, https_scraped, socks4_scraped, socks5_scraped
-    with (open("scraped/HTTP.txt", "r") as file_http, open("scraped/HTTPS.txt", "r") as file_https, open("scraped/SOCKS4.txt", "r") as file_socks4, open("scraped/SOCKS5.txt", "r") as file_socks5):
-        http_scraped = len(file_http.readlines())
-        https_scraped = len(file_https.readlines())
-        socks4_scraped = len(file_socks4.readlines())
-        socks5_scraped = len(file_socks5.readlines())
-
     for protocol in protocols:
-        checking_handler(choice(site), timeout, protocol)
-    
+        checking_handler(site, timeout, protocol, rand_UA)
+
     print(vanity_line)
     print()
     input("Press enter to continue... ")
     banner()
     print(vanity_line)
-    print(f"|| {socks4_scraped:,} SOCKS4 proxies scraped.")
-    print(f"|| {socks5_scraped:,} SOCKS5 proxies scraped.")
-    print(f"|| {http_scraped:,} HTTP proxies scraped.")
-    print(f"|| {https_scraped:,} HTTPS proxies scraped.")
-    total = http_scraped + https_scraped + socks4_scraped + socks5_scraped
-    print(f"|| {total:,} proxies scraped in total.")
-    print(vanity_line)
-
-    #with suppress(Exception):
-    #    print(f"|| {len(socks5_valid_proxies)} of {len(socks5_proxies)} ({socks5_percentage:,:.2f}%) SOCKS5 proxies are currently active."
-    #with suppress(Exception):
-    #    print(f"|| {len(socks4_valid_proxies)} of {len(socks4_proxies)} ({socks4_percentage:,:.2f}%) SOCKS4 proxies are currently active.")
     with suppress(Exception):
-        print(f"|| {len(http_valid_proxies):,} of {len(http_proxies):,} ({http_percentage:.2f}%) HTTP proxies are currently active.")
+        print(f"|| {len(http_valid_proxies)} of {len(http_proxies)} ({http_percentage:.2f}%) HTTP proxies are currently active.")
     with suppress(Exception):
-        print(f"|| {len(https_valid_proxies):,} of {len(https_proxies):,} ({https_percentage:.2f}%) HTTPS proxies are currently active.")
-    text = "||     Thank you for using proXXy.     ||"
-
-    # Calculate the remaining empty space on the left and right
-    empty_space = terminal_width - len(text)
-    left_space = empty_space // 2
-    right_space = empty_space - left_space
-
-    print(vanity_line)
-    print(" " * left_space + text + " " * right_space)
-    print(vanity_line)
-    exit(1)
+        print(f"|| {len(https_valid_proxies)} of {len(https_proxies)} ({https_percentage:.2f}%) HTTPS proxies are currently active.")
 
 def exit_con():
     text = "||     Thank you for using proXXy.     ||"
@@ -516,25 +462,25 @@ def exit_con():
     print(vanity_line)
     exit(1)
 
-def checking_handler(site, timeout, protocol):
+def checking_handler(site, timeout, protocol, rand_UA):
     if protocol == "SOCKS4":
         with suppress(Exception):
-            SOCKS4_check(site, timeout, threads=100)
+            SOCKS4_check(site, timeout, rand_UA)
     elif protocol == "SOCKS5":
         with suppress(Exception):
-            SOCKS5_check(site, timeout, threads=100)
+            SOCKS5_check(site, timeout, rand_UA)
     elif protocol == "HTTP":
         with suppress(Exception):
-            HTTP_check(site, timeout)
+            HTTP_check(site, timeout, rand_UA)
     elif protocol == "HTTPS":
         with suppress(Exception):
-            HTTPS_check(site, timeout)
+            HTTPS_check(site, timeout, rand_UA)
 
-def main(timeout):
+def main(rand_UA, timeout, prox_check):
     try:
         banner()
         filterwarnings("ignore", category=UserWarning, message=".*looks like you're parsing an XML document using an HTML parser.*")
-        site = ['http://httpbin.org/ip', 'https://httpbin.org/ip', 'http://example.com', 'https://example.com']
+        site = "http://httpbin.org/ip"
         # initialize files
         with open("scraped/HTTP.txt", "w"), open("scraped/SOCKS4.txt", "w"), open("scraped/SOCKS5.txt", "w"), open("scraped/HTTPS.txt", "w"), open("error.log", "w") as error_log:
             scraping_handler(error_log, site, timeout)
@@ -562,24 +508,21 @@ def run_update_script():
     exit_con()
 
 def validate_positive_integer(value):
-    ivalue = int(value)
-    if ivalue < 1:
-        raise ArgumentTypeError(f"{value} is not a positive integer")
-    return ivalue
-
-def validate_timeout(value):
-    ivalue = int(value)
-    if ivalue < 5:
-        raise ArgumentTypeError("Timeout cannot be lower than 5 seconds")
-    return ivalue
+    try:
+        int_value = int(value)
+        if int_value < 5:
+            raise ArgumentTypeError("Timeout cannot be lower than 5 seconds.")
+        return int_value
+    except ValueError as e:
+        raise ArgumentTypeError("Timeout must be a positive integer.") from e
 
 if __name__ == '__main__':
-    parser = ArgumentParser(description='A super simple multithreaded proxy scraper; scraping & checking ~80k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.')
-    parser.add_argument('-u', '--update', action='store_true', help='update project')
-    parser.add_argument('-v', '--validate', choices=['T', 'F'], help='validate proxies (T/F)')
-    parser.add_argument('-th', '--threads', type=validate_positive_integer, default=100, help='number of threads to use, default is 100')
-    parser.add_argument('-ti', '--timeout', type=validate_timeout, help='set the number of seconds for the default timeout (cannot be lower than 5 seconds)')
-    parser.add_argument('-y', action='store_true', help='continue without prompts')
+    parser = ArgumentParser(description='A super simple multithreaded proxy scraper; scraping & checking ~50k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.')
+    parser.add_argument('-u', '--update', action='store_true', help='Update project')
+    parser.add_argument('-v', '--validate', choices=['T', 'F'], help='Validate proxies (T/F)')
+    parser.add_argument('-r', '--random-UA', choices=['T', 'F'], help='Use random user agents (T/F)')
+    parser.add_argument('-t', '--timeout', type=validate_positive_integer, help='Set the number of seconds for the default timeout (cannot be lower than 5 seconds)')
+    parser.add_argument('-y', action='store_true', help='Continue without prompts')
 
     args = parser.parse_args()
 
@@ -589,29 +532,41 @@ if __name__ == '__main__':
     vanity_line = f"<{dashes}>"
 
     try:
-        if len(argv) == 1:
+        if not any(vars(args).values()):
             parameters()
         elif args.update:
             system('cls' if name == 'nt' else 'clear')
             print(vanity_line)
             run_update_script()
         else:
-            if args.validate == 'T' and (args.threads is None or args.timeout is None):
-                print("Error: If you use -vT, you must provide -th and -ti flags.")
+            rand_UA = args.random_UA == 'T'
+            timeout = args.timeout
+            prox_check = args.validate == 'T'
+
+            if args.validate == 'F':
+                # If -v is set to F, -r and -t can be omitted
+                if args.random_UA or args.timeout:
+                    print("Error: If you use -vF, you cannot provide -r or -t.")
+                    exit(1)
+            elif any([args.random_UA, args.timeout]) and not all([args.random_UA, args.timeout]):
+                print("Error: If you use -vT, you must provide -r and -t flags.")
                 exit(1)
 
-            if args.validate == 'T' and not args.y:
-                print(vanity_line)
-                print(f"Selected options:\n")
-                print(f" -- Proxy check: {args.validate == 'T'}")
-                print(f" -- Threads: {args.threads or 100}")
-                print(f" -- Timeout: {args.timeout or 10}")
-                print(vanity_line)
-                confirm_input = input("\nDo you want to continue? (Y/n): ").lower()
-                # Check user's confirmation
-                if confirm_input == "n":
-                    exit(1)
-            main(args.timeout)
+            if args.y:
+                main(rand_UA, timeout, prox_check)
+                exit(1)
+
+            print(vanity_line)
+            print(f"Selected option(s):\n\n -- Proxy check: {prox_check}")
+            print(f" -- Random user agents: {rand_UA}")
+            print(f" -- Timeout: {timeout}")
+            print(vanity_line)
+            confirm_input = input("\nDo you want to continue? (Y/n): ").lower()
+            # Check user's confirmation
+            if confirm_input == "n":
+                exit(1)
+            main(rand_UA, timeout, prox_check)
+
     except ArgumentError:
         parser.print_help()
     except KeyboardInterrupt:

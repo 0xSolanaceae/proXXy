@@ -432,7 +432,6 @@ def scraping_handler(error_log, site, timeout):
 
     if prox_check:
         prox_check_handler(protocols, site, timeout)
-    exit_con()
 
 def prox_check_handler(protocols, site, timeout):
     for protocol in protocols:

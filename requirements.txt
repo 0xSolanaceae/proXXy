@@ -1,5 +1,5 @@
-beautifulsoup4==4.12.2
-pystyle==2.9
-requests==2.31.0
-tqdm==4.65.0
-contextlib3==3.10.0
+hrequests
+pystyle
+requests
+tqdm
+contextlib3

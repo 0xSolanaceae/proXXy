@@ -63,7 +63,7 @@ The program will output three files in the project directory containing the regu
 
 along with an error output file titled `error.log` denoting the sources that were unable to be accessed.
 
-## Advanced Usage
+## Advanced Usage [BETA testing]
 
 The basic syntax for running proXXy is as follows:
 

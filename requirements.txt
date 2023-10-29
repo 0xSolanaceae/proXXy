@@ -3,6 +3,7 @@ pystyle
 requests
 tqdm
 contextlib3
+bs4
 gevent>=23.9.0
 numpy>=1.22.2
 setuptools>=65.5.1

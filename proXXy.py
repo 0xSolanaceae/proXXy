@@ -16,6 +16,13 @@ from platform import system as platform_system
 from socket import timeout as socket_timeout
 from argparse import ArgumentParser, ArgumentError, ArgumentTypeError
 
+
+class NoneInputError(Exception):
+    def __init__(self, message = "Error: No input was given. Please try again."):
+        self.message = message
+        super().__init__(self.message)
+
+
 def proxy_sources():
     return {
         "HTTP": [
@@ -135,40 +142,37 @@ def parameters():
 
     try:
         banner()
-        try:
-            prox_check_input = input("Would you like to check proxies? (Y/n): ").lower()
-        except KeyboardInterrupt:
-            exit_con()
+        prox_check_input = input("Would you like to check proxies? (Y/n): ").lower()
         if prox_check_input == "":
-            raise Exception
+            raise NoneInputError()
         prox_check = prox_check_input.lower() != "n"
-    except Exception:
+    except KeyboardInterrupt:
+        exit_con()
+    except NoneInputError:
         prox_check = True
 
     if prox_check:
         try:
             banner()
-            try:
-                timeout_input = input("How long should the request timeout be? (Default is 10 seconds, cannot be lower than 5): ")
-            except KeyboardInterrupt:
-                exit_con()
+            timeout_input = input("How long should the request timeout be? (Default is 10 seconds, cannot be lower than 5): ")
             if timeout_input == "":
-                raise Exception
+                raise NoneInputError()
             timeout_input = int(timeout_input)
             timeout = timeout_input if timeout_input >= 5 else 10
-        except Exception:
+        except KeyboardInterrupt:
+            exit_con()
+        except NoneInputError:
             timeout = 10
 
         try:
             banner()
-            try:
-                threads_input = input("How many threads should be used? (Default is 100): ")
-            except KeyboardInterrupt:
-                exit_con()
+            threads_input = input("How many threads should be used? (Default is 100): ")
             if threads_input == "":
-                raise Exception
+                raise NoneInputError()
             threads_input = int(threads_input)
-        except Exception:
+        except KeyboardInterrupt:
+            exit_con()
+        except NoneInputError:
             threads = 100
     else:
         timeout = None

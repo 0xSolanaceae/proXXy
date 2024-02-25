@@ -66,7 +66,7 @@ The basic syntax for running proXXy is as follows:
 usage: proXXy.py [-h] [--validate] [--update]
 ```
 
-1. `-v, --validate`: Use this flag to enable proxy validation. The scraper will attempt to validate the scraped proxies by checking their accessibility. Allow the program to complete the checking of HTTP & HTTPS proxies, then check the updated text files located in `output/` directory! (After each instance of the checking process, allow the program time to join threads before moving on to the next proxy protocol)
+1. `-v, --validate`: Use this flag to enable proxy validation. The scraper will attempt to validate the scraped proxies by checking their accessibility. Allow the program to complete the checking of HTTP & HTTPS proxies, then check the updated text files located in `output/` directory! (Please allow for up to 10 minutes for proxies to validate, depending on your hardware.)
 
 2. `-u, --update`: This flag updates the project. Cannot be used in conjunction with any other flag.
 
@@ -85,6 +85,7 @@ options:
 
 ## Planned Features
 
+- Allow the user to choose the number of threads they'd like to use with flags, & provide the user recommended values based on their hardware.
 - Implement SOCKS4 & SOCKS5 testing.
 - Proxy sorting instead of hardcoding.
 - Discerning between Elite, Anonymous, and Transparent anonymity classes of proxies.

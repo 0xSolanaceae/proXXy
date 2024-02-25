@@ -94,6 +94,25 @@ options:
 
 Need help and can't get it to run correctly? Open an issue or contact me [here](https://solanaceae.xyz/)
 
+## Changelog
+
+[Release v2.1](https://github.com/Atropa-Solanaceae/proXXy/releases/tag/v2.1)
+- Refactored the entire codebase for improved readability and maintainability.
+- Reorganized code into modular functions and classes for better organization.
+- Removed unnecessary imports and redundant code.
+- Utilized Python libraries like `yaspin` for enhanced CLI interaction.
+- Implemented error logging for better error handling and debugging.
+- Introduced a new `init()` function to initialize the application and provide visual feedback.
+- Added support for command-line arguments using the `argparse` module.
+- Implemented proxy validation after scraping using the `--validate` flag.
+- Improved proxy scraping process by using Scrapy for better efficiency.
+- Added functionality to remove duplicate proxies and filter out specific ports.
+- Enhanced user feedback with informative messages and progress indicators.
+- Updated the update script functionality for better cross-platform support.
+- Generated a new `validated` directory to store validated proxies.
+- Updated the `README.md` file to reflect changes and provide usage instructions.
+
+
 ---
 ## License
 

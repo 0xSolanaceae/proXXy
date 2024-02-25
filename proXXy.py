@@ -7,10 +7,11 @@ import shutil
 import re
 import logging
 import argparse
-from hrequests import session
+import subprocess
 from yaspin import yaspin
-from scrapy.crawler import CrawlerProcess
+from hrequests import session
 from scrapy import Spider, Request
+from scrapy.crawler import CrawlerProcess
 from platform import system as platform_system
 from proxy_check import http_check, https_check
 
@@ -293,10 +294,10 @@ def run_update_script():
         or current_os != 'Windows'
         and current_os == 'Darwin'
     ):
-        os.run(['chmod', '+x', 'update.sh'])
-        os.run(['./update.sh'])
+        subprocess.run(['chmod', '+x', 'update.sh'])
+        subprocess.run(['./update.sh'])
     elif current_os == 'Windows':
-        os.run(['update.bat'])
+        subprocess.run(['update.bat'])
     else:
         print('Unsupported operating system.')
 

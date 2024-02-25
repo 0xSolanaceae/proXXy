@@ -1,5 +1,5 @@
-hrequests
-pystyle
-requests
-tqdm
-contextlib3
+pystyle==2.9
+yaspin==3.0.1
+scrapy==2.11.1
+tqdm==4.66.2
+hrequests[all]

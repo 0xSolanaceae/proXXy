@@ -311,7 +311,7 @@ def main():
         run_update_script()
         return
     
-    if args.validate:
+    if args.validate and args.update:
         print("Error: The '--validate' flag cannot be used in conjunction with the '--update' flag.")
         return
     

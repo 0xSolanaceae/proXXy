@@ -1,20 +1,18 @@
 #!/usr/bin/python3
 # Built by Solanaceae -- https://solanaceae.xyz/
-import hrequests
-from sys import argv
-from re import findall
-from random import choice
-from subprocess import run
-from os import name, system
-from threading import Thread
-from contextlib import suppress
-from warnings import filterwarnings
-from shutil import get_terminal_size
-from pystyle import Colors, Colorate
-from requests import get, exceptions
+import os
+import pystyle
+import time
+import shutil
+import re
+import logging
+import argparse
+from hrequests import session
+from yaspin import yaspin
+from scrapy.crawler import CrawlerProcess
+from scrapy import Spider, Request
 from platform import system as platform_system
-from socket import timeout as socket_timeout
-from argparse import ArgumentParser, ArgumentError, ArgumentTypeError
+from proxy_check import http_check, https_check
 
 def proxy_sources():
     return {
@@ -52,6 +50,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/saisuiu/Lionkings-Http-Proxys-Proxies/main/cnfree.txt",
             "https://raw.githubusercontent.com/Anonym0usWork1221/Free-Proxies/main/proxy_files/http_proxies.txt",
             "https://raw.githubusercontent.com/officialputuid/KangProxy/KangProxy/http/http.txt",
+            "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/http.txt",
         ],
         "SOCKS4": [
             "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks4",
@@ -76,6 +75,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/zloi-user/hideip.me/main/socks4.txt",
             "https://raw.githubusercontent.com/mmpx12/proxy-list/master/socks4.txt",
             "https://raw.githubusercontent.com/B4RC0DE-TM/proxy-list/main/SOCKS4.txt",
+            "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/socks4.txt"
         ],
         "SOCKS5": [
             "https://raw.githubusercontent.com/B4RC0DE-TM/proxy-list/main/SOCKS5.txt",
@@ -100,7 +100,8 @@ def proxy_sources():
             "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks5.txt",
             "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks5.txt",
             "https://spys.me/socks.txt",
-            "https://raw.githubusercontent.com/zloi-user/hideip.me/main/socks5.txt"
+            "https://raw.githubusercontent.com/zloi-user/hideip.me/main/socks5.txt",
+            "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/socks5.txt"
         ],
         "HTTPS": [
             "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-https.txt",
@@ -109,6 +110,7 @@ def proxy_sources():
             "https://raw.githubusercontent.com/zloi-user/hideip.me/main/https.txt",
             "https://raw.githubusercontent.com/Anonym0usWork1221/Free-Proxies/main/proxy_files/https_proxies.txt",
             "https://raw.githubusercontent.com/officialputuid/KangProxy/KangProxy/https/https.txt",
+            "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/https.txt"
         ]
     }
 
@@ -125,491 +127,209 @@ def banner():
 
     os.system("title proXXy -- by Solanaceae")
     os.system('cls' if os.name == 'nt' else 'clear')
-    print(Center.XCenter(Colorate.Vertical(Colors.purple_to_blue, banner, 1)))
+    print((pystyle.Colorate.Vertical(pystyle.Colors.purple_to_blue, banner, 1)))
     print()
-    
-def parameters():
-    global timeout
-    global prox_check
-    global user_agents
+    print(vanity_line())
 
+def vanity_line():
+    terminal_width = shutil.get_terminal_size().columns
+    dash = "—"
+    dashes = dash * (terminal_width - 2)
+    return f"<{dashes}>"
+
+def init():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    logging.basicConfig(filename='error.log', level=logging.ERROR)
+    with yaspin().bouncingBar as sp:
+        sp.text = "Initializing..."
+        time.sleep(2.5)
+        sp.ok("[_OK_]")
+        time.sleep(1.5)
+
+def check_url_validity(url):
     try:
-        banner()
-        try:
-            prox_check_input = input("Would you like to check proxies? (Y/n): ").lower()
-        except KeyboardInterrupt:
-            exit_con()
-        if prox_check_input == "":
-            raise Exception
-        prox_check = prox_check_input.lower() != "n"
-    except Exception:
-        prox_check = True
-
-    if prox_check:
-        try:
-            banner()
-            try:
-                timeout_input = input("How long should the request timeout be? (Default is 10 seconds, cannot be lower than 5): ")
-            except KeyboardInterrupt:
-                exit_con()
-            if timeout_input == "":
-                raise Exception
-            timeout_input = int(timeout_input)
-            timeout = timeout_input if timeout_input >= 5 else 10
-        except Exception:
-            timeout = 10
-
-        try:
-            banner()
-            try:
-                threads_input = input("How many threads should be used? (Default is 100): ")
-            except KeyboardInterrupt:
-                exit_con()
-            if threads_input == "":
-                raise Exception
-            threads_input = int(threads_input)
-        except Exception:
-            threads = 100
-    else:
-        timeout = None
-        threads = None
-    
-
-    user_agents = []
-    with open("user_agents.txt", "r") as file:
-        user_agents = file.read().splitlines()
-
-    # Confirmation prompt
-    banner()
-    print(f"Selected options:\n")
-    print(f" -- Proxy check: {prox_check}")
-    if timeout is not None:
-        print(f" -- Timeout: {timeout}")
-    if threads is not None:
-        print(f" -- Threads: {threads}")
-    confirm_input = input("\nDo you want to continue? (Y/n): ").lower()
-    # Check user's confirmation
-    if confirm_input == "n":
-        exit_con()
-    main(timeout)
-
-## proxy processing
-
-def remove_duplicate_proxies(protocol):
-    # Read in the text document
-    try:
-        with open(f'scraped/{protocol}.txt', 'r') as file:
-            proxies_data = file.read()
-    except IOError:
-        print(f"Error: Could not read {protocol}.txt")
-        return
-
-    # Split the proxies into a list and remove duplicates
-    proxies = proxies_data.splitlines()
-    unique_proxies = list(set(proxies))
-
-    # Overwrite the original text document with the unique proxies
-    try:
-        with open(f'scraped/{protocol}.txt', 'w') as file:
-            for proxy in unique_proxies:
-                file.write(proxy + '\n')
-    except IOError:
-        print(f"Error: Could not write to {protocol}.txt")
-        return
-    
-def regularize_proxies(protocol):
-    try:
-        with open(f'scraped/{protocol}.txt', 'r') as file:
-            text_data = file.read()
-            lines = file.readlines()
-    except IOError:
-        print(f"Error: Could not read {protocol}.txt")
-        return
-
-    # Define a regex pattern to match proxies
-    proxy_pattern = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+'
-    proxies = re.findall(proxy_pattern, text_data)
-
-    # Overwrite the original text document with the regularized proxies
-    try:
-        with open(f'scraped/{protocol}.txt', 'w') as file:
-            file.write('\n'.join(lines)) #remove empty lines
-            for proxy in proxies:
-                file.write(proxy + '\n')
-
-    except IOError:
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print(vanity_line)
-        print(f"\nError: Could not write to {protocol}.txt\n")
-        exit_con()
-
-## checking portion
-
-def SOCKS4_check(site, timeout, threads):
-    pass
-    
-def SOCKS5_check(site, timeout, threads):
-    pass
-
-def HTTP_check(site, timeout):
-    from tqdm import tqdm
-    global http_valid_proxies
-    global http_proxies
-    global http_percentage
-    
-    PROXY_LIST_FILE = 'scraped/HTTP.txt'
-    TEST_URL = site
-    TIMEOUT = timeout
-
-    def test_proxy(proxy, results):
-        with contextlib.suppress(requests.exceptions.RequestException, socket.timeout):
-            headers = {}
-            headers['User-Agent'] = choice(user_agents)
-        
-            response = get(TEST_URL, proxies={'http': proxy}, headers=headers, timeout=TIMEOUT)
-            if response.status_code == 200:
-                results.append(proxy)
-
-    http_proxies = []
-    http_valid_proxies = []
-    with open(PROXY_LIST_FILE, 'r') as f:
-        http_proxies = [line.strip() for line in f.readlines()]
-
-    threads = []
-    for proxy in tqdm.tqdm(http_proxies, desc="Checking HTTP Proxies", ascii=" #", unit= " prox"):
-        thread = threading.Thread(target=test_proxy, args=(proxy, http_valid_proxies), daemon=True)
-        threads.append(thread)
-        thread.start()
-
-    for thread in tqdm.tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
-        thread.join()
-
-    with open(PROXY_LIST_FILE, 'w') as f:
-        for proxy in http_valid_proxies:
-            f.write(proxy + '\n')
-    
-def HTTPS_check(site, timeout):
-    from tqdm import tqdm
-    global https_valid_proxies
-    global https_proxies
-    global https_percentage
-    
-    PROXY_LIST_FILE = 'scraped/HTTPS.txt'
-    TEST_URL = site
-    TIMEOUT = timeout
-
-    def test_proxy(proxy, results):
-        with contextlib.suppress(requests.exceptions.RequestException, socket.timeout):
-            headers = {}
-            headers['User-Agent'] = choice(user_agents)
-
-            response = requests.get(TEST_URL, proxies={'https': proxy}, headers=headers, timeout=TIMEOUT)
-            if response.status_code == 200:
-                results.append(proxy)
-
-    https_proxies = []
-    https_valid_proxies = []
-    with open(PROXY_LIST_FILE, 'r') as f:
-        https_proxies = [line.strip() for line in f.readlines()]
-
-    threads = []
-    #for proxy in tqdm.tqdm(proxies, desc="Checking HTTPS Proxies", ascii=" #", unit= " prox"):
-    ##    thread = threading.Thread(target=test_proxy, args=(proxy, https_valid_proxies), daemon=True)
-    #    threads.append(thread)
-    #    thread.start()
-
-    for thread in tqdm.tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
-        thread.join()
-
-    with open(PROXY_LIST_FILE, 'w') as f:
-        for proxy in https_valid_proxies:
-            f.write(proxy + '\n')
-
-## proxy scraping
-
-def scrape_url(url, proxy_type, error_log):
-    global accessed_sources
-    global total_sources
-
-    total_sources += 1
-    session = hrequests.Session()
-
-    try:
-        response = session.get(url)
-        if response.status_code == 200:
-            accessed_sources += 1
-            scraped_data = response.html.text
-            if proxy_type == "HTTP":
-                with open("scraped/HTTP.txt", "a") as file_http:
-                    file_http.write(scraped_data + '\n')
-            elif proxy_type == "SOCKS4":
-                with open("scraped/SOCKS4.txt", "a") as file_socks4:
-                    file_socks4.write(scraped_data + '\n')
-            elif proxy_type == "SOCKS5":
-                with open("scraped/SOCKS5.txt", "a") as file_socks5:
-                    file_socks5.write(scraped_data + '\n')
-            elif proxy_type == "HTTPS":
-                with open("scraped/HTTPS.txt", "a") as file_https:
-                    file_https.write(scraped_data + '\n')
-        else:
-            error_log.write(f"Could not access: {url}\n")
+        response = session.get(url, timeout=1)
+        return response.status_code == 200
     except Exception as e:
-        error_log.write(f"Could not access: {url}")
-        error_log.write(f" || Error message: {str(e)}\n")
+        logging.error(f"Error: {e}\n")
+        return False
 
-def scraping_handler(error_log, site, timeout):
-    import tqdm
-    global accessed_sources
-    global total_sources
+def validate_proxies(proxy_sources):
+    valid_urls = []
+    invalid_urls = []
 
-    print(vanity_line)
-
-    # proxy sources
-    proxies = proxy_sources()
-
-    total_sources = 0
-    accessed_sources = 0
-
-    threads = []
-    # webscraping proxies
-    for proxy_type, urls in tqdm.tqdm(proxies.items(), desc="Scraping Sources", ascii=" #", unit=" src"):
+    start_time = time.time()
+    
+    for protocol, urls in proxy_sources.items():
+        print(f"\nValidating {protocol} proxy urls...\n")
         for url in urls:
-            thread = threading.Thread(target=scrape_url, args=(url, proxy_type, error_log))
-            thread.start()
-            threads.append(thread)
+            cleaned_url = url.split("//")[-1]
+            if check_url_validity(url):
+                print(f"[+] VALID: {cleaned_url}")
+                valid_urls.append(url)
+            else:
+                print(f"[-] INVALID: {cleaned_url}")
+                invalid_urls.append(url)
+            
+    with open("validated/VALID.txt", 'w') as valid_file:
+        for valid_url in valid_urls:
+            valid_file.write(f"{valid_url}\n")
 
-    # Wait for all threads to finish
-    for thread in tqdm.tqdm(threads, desc="Joining Threads", ascii=" #", unit= " thr"):
-        thread.join()
-    print()
-
-    if accessed_sources == 0:
-        error = "|| A network error occured, please ensure your device is connected to the internet. ||"
-
-        empty_space = terminal_width - len(error)
-        left_space = empty_space // 2
-        right_space = empty_space - left_space
-
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print(vanity_line)
-        print(" " * left_space + error + " " * right_space)
-        exit_con()
-
-    elif accessed_sources < total_sources:
-        error = "|| Some sources could not be accessed, please check the logfile for more details. ||"
-
-        empty_space = terminal_width - len(error)
-        left_space = empty_space // 2
-        right_space = empty_space - left_space
-        print(" " * left_space + error + " " * right_space)
-
-
-    percentage = accessed_sources / total_sources * 100
-    info = f"|| Total Sources: {total_sources} || Accessed Sources: {accessed_sources} || ({percentage:.2f}%) ||"
-
-    # Calculate the remaining empty space on the left and right
-    empty_space = terminal_width - len(info)
-    left_space = empty_space // 2
-    right_space = empty_space - left_space
-
-    print(" " * left_space + info + " " * right_space)
-    print()
-
-    protocols = ["SOCKS4", "SOCKS5", "HTTP", "HTTPS"]
-    for protocol in tqdm.tqdm(protocols, desc="Regularizing Proxies", ascii=" #", unit= " prox"):
-        regularize_proxies(protocol)
-    for protocol in tqdm.tqdm(protocols, desc="Removing Duplicates", ascii=" #", unit= " prox"):
-        remove_duplicate_proxies(protocol)
-
-    if prox_check:
-        print()
-        prox_check_handler(protocols, site, timeout)
-    else:
-        non_check_closure()
-
-def non_check_closure():
-    with (open("scraped/HTTP.txt", "r") as file_http, open("scraped/HTTPS.txt", "r") as file_https, open("scraped/SOCKS4.txt", "r") as file_socks4, open("scraped/SOCKS5.txt", "r") as file_socks5):
-        http_scraped = len(file_http.readlines())
-        https_scraped = len(file_https.readlines())
-        socks4_scraped = len(file_socks4.readlines())
-        socks5_scraped = len(file_socks5.readlines())
-    print(vanity_line)
-    print(f"|| {socks4_scraped:,} SOCKS4 proxies scraped.")
-    print(f"|| {socks5_scraped:,} SOCKS5 proxies scraped.")
-    print(f"|| {http_scraped:,} HTTP proxies scraped.")
-    print(f"|| {https_scraped:,} HTTPS proxies scraped.")
-    total = http_scraped + https_scraped + socks4_scraped + socks5_scraped
-    print(f"|| Total proxies scraped: {total:,}.")
-
-    text = "||     Thank you for using proXXy.     ||"
-
-    # Calculate the remaining empty space on the left and right
-    empty_space = terminal_width - len(text)
-    left_space = empty_space // 2
-    right_space = empty_space - left_space
-
-    print(vanity_line)
-    print(" " * left_space + text + " " * right_space)
-    print(vanity_line)
-    exit(1)
+    with open("validated/INVALID.txt", 'w') as invalid_file:
+        for invalid_url in invalid_urls:
+            invalid_file.write(f"{invalid_url}\n")
+            
+    if not valid_urls:
+        print("[-] A network error may have occurred, as no urls were found valid. Please ensure your device is connected to the internet.\n")
+        exit()
     
-def prox_check_handler(protocols, site, timeout):
-    global http_scraped, https_scraped, socks4_scraped, socks5_scraped
-    with (open("scraped/HTTP.txt", "r") as file_http, open("scraped/HTTPS.txt", "r") as file_https, open("scraped/SOCKS4.txt", "r") as file_socks4, open("scraped/SOCKS5.txt", "r") as file_socks5):
-        http_scraped = len(file_http.readlines())
-        https_scraped = len(file_https.readlines())
-        socks4_scraped = len(file_socks4.readlines())
-        socks5_scraped = len(file_socks5.readlines())
+    accessed = len(valid_urls)
+    not_accessed = len(invalid_urls)
+    print(f"\nValidation complete, {accessed:,} URL(s) accessed, {not_accessed:,} URL(s) not accessed.\n")
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    elapsed_time = round(elapsed_time, 2)
+    print(f"Time taken to validate all URLs: {elapsed_time} seconds")
+    print(vanity_line())
+    time.sleep(1)
+    return valid_urls, invalid_urls
 
-    for protocol in protocols:
-        checking_handler(choice(site), timeout, protocol)
+class ProxySpider(Spider):
+    name = 'proxy_spider'
+    custom_settings = {
+        'LOG_LEVEL': 'ERROR',
+    }
+
+    def start_requests(self):
+            sources = proxy_sources()
+            for protocol, urls in sources.items():
+                for url in urls:
+                    try:
+                        yield Request(url, callback=self.parse, meta={'protocol': protocol})
+                    except ValueError:
+                        pass
+                
+    def parse(self, response):
+        protocol = response.meta['protocol']
+        proxies = self.extract_proxies(response.text)
+        self.save_proxies(protocol, proxies)
+
+    def extract_proxies(self, html_content):
+        proxy_pattern = re.compile(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+')
+        proxies = proxy_pattern.findall(html_content)
+        
+        return proxies
+
+    def save_proxies(self, protocol, proxies):
+        filename = f"output/{protocol}.txt"
+        with open(filename, 'a') as file:
+            for proxy in proxies:
+                file.write(f"{proxy}\n")
+
+def proxy_scrape():
+    process = CrawlerProcess(settings={
+        'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    })
+
+    process.crawl(ProxySpider)
+    process.start()
+    time.sleep(1)
+    def count_lines(file_path):
+        with open(file_path, 'r') as file:
+            return sum(1 for line in file)
+
+    http_lines = count_lines('output/HTTP.txt')
+    https_lines = count_lines('output/HTTPS.txt')
+    socks4_lines = count_lines('output/SOCKS4.txt')
+    socks5_lines = count_lines('output/SOCKS5.txt')
     
-    print(vanity_line)
-    print()
-    input("Press enter to continue... ")
-    banner()
-    print(vanity_line)
-    print(f"|| {socks4_scraped:,} SOCKS4 proxies scraped.")
-    print(f"|| {socks5_scraped:,} SOCKS5 proxies scraped.")
-    print(f"|| {http_scraped:,} HTTP proxies scraped.")
-    print(f"|| {https_scraped:,} HTTPS proxies scraped.")
-    total = http_scraped + https_scraped + socks4_scraped + socks5_scraped
-    print(f"|| {total:,} proxies scraped in total.")
-    print(vanity_line)
+    total = http_lines + https_lines + socks4_lines + socks5_lines
+    print(f'\n[+] {total:,} Proxies scraped.')
+        
+def proxy_clean(http_file, https_file, socks4_file, socks5_file):
+    def remove_duplicates(input_file, output_file):
+        with open(input_file, 'r') as file:
+            unique_proxies = set(file.readlines())
 
-    #with suppress(Exception):
-    #    print(f"|| {len(socks5_valid_proxies)} of {len(socks5_proxies)} ({socks5_percentage:,:.2f}%) SOCKS5 proxies are currently active."
-    #with suppress(Exception):
-    #    print(f"|| {len(socks4_valid_proxies)} of {len(socks4_proxies)} ({socks4_percentage:,:.2f}%) SOCKS4 proxies are currently active.")
-    with suppress(Exception):
-        print(f"|| {len(http_valid_proxies):,} of {len(http_proxies):,} ({http_percentage:.2f}%) HTTP proxies are currently active.")
-    with suppress(Exception):
-        print(f"|| {len(https_valid_proxies):,} of {len(https_proxies):,} ({https_percentage:.2f}%) HTTPS proxies are currently active.")
-    text = "||     Thank you for using proXXy.     ||"
+        with open(output_file, 'w') as file:
+            file.writelines(unique_proxies)
+    
+    def port_filter(input_file, output_file):
+        with open(input_file, 'r') as file:
+            lines = file.readlines()
 
-    # Calculate the remaining empty space on the left and right
-    empty_space = terminal_width - len(text)
-    left_space = empty_space // 2
-    right_space = empty_space - left_space
+        filtered_lines = [line.strip() for line in lines if not (line.strip().endswith(":1080") or line.strip().endswith(":5555"))]
 
-    print(vanity_line)
-    print(" " * left_space + text + " " * right_space)
-    print(vanity_line)
-    exit(1)
+        with open(input_file, 'w') as output_file:
+            output_file.write('\n'.join(filtered_lines))
 
-def exit_con():
-    text = "||     Thank you for using proXXy.     ||"
+    remove_duplicates(http_file, http_file)
+    remove_duplicates(https_file, https_file)
+    remove_duplicates(socks4_file, socks4_file)
+    remove_duplicates(socks5_file, socks5_file)
+    port_filter(http_file, http_file)
+    port_filter(https_file, https_file)
+    port_filter(socks4_file, socks4_file)
+    port_filter(socks5_file, socks5_file)
+    
+    def count_lines(file_path):
+        with open(file_path, 'r') as file:
+            return sum(1 for line in file)
 
-    # Calculate the remaining empty space on the left and right
-    empty_space = terminal_width - len(text)
-    left_space = empty_space // 2
-    right_space = empty_space - left_space
-
-    banner()
-    print(vanity_line)
-    print(" " * left_space + text + " " * right_space)
-    print(vanity_line)
-    exit(1)
-
-def checking_handler(site, timeout, protocol):
-    if protocol == "SOCKS4":
-        with suppress(Exception):
-            SOCKS4_check(site, timeout, threads=100)
-    elif protocol == "SOCKS5":
-        with suppress(Exception):
-            SOCKS5_check(site, timeout, threads=100)
-    elif protocol == "HTTP":
-        with suppress(Exception):
-            HTTP_check(site, timeout)
-    elif protocol == "HTTPS":
-        with suppress(Exception):
-            HTTPS_check(site, timeout)
-
-def main(timeout):
-    try:
-        banner()
-        filterwarnings("ignore", category=UserWarning, message=".*looks like you're parsing an XML document using an HTML parser.*")
-        site = ['http://httpbin.org/ip', 'https://httpbin.org/ip', 'http://example.com', 'https://example.com']
-        # initialize files
-        with open("scraped/HTTP.txt", "w"), open("scraped/SOCKS4.txt", "w"), open("scraped/SOCKS5.txt", "w"), open("scraped/HTTPS.txt", "w"), open("error.log", "w") as error_log:
-            scraping_handler(error_log, site, timeout)
-    except KeyboardInterrupt:
-        os.system('cls' if os.name == 'nt' else 'clear')
-        exit_con()
+    http_lines = count_lines('output/HTTP.txt')
+    https_lines = count_lines('output/HTTPS.txt')
+    socks4_lines = count_lines('output/SOCKS4.txt')
+    socks5_lines = count_lines('output/SOCKS5.txt')
+    
+    total = http_lines + https_lines + socks4_lines + socks5_lines
+    
+    print(f"[+] {total:,} Proxies sanitized.\n")
+    print(vanity_line())
 
 def run_update_script():
-    current_os = platform.system()
+    current_os = platform_system()
     if (
         current_os == 'Linux'
         or current_os != 'Windows'
         and current_os == 'Darwin'
     ):
-        # Change the permissions of the update script to make it executable
-        subprocess.run(['chmod', '+x', 'update.sh'])
-        # Run the update script
-        subprocess.run(['./update.sh'])
+        os.run(['chmod', '+x', 'update.sh'])
+        os.run(['./update.sh'])
     elif current_os == 'Windows':
-        # Run the update batch script
-        subprocess.run(['update.bat'])
+        os.run(['update.bat'])
     else:
         print('Unsupported operating system.')
 
-    exit_con()
-
-def validate_positive_integer(value):
-    ivalue = int(value)
-    if ivalue < 1:
-        raise ArgumentTypeError(f"{value} is not a positive integer")
-    return ivalue
-
-def validate_timeout(value):
-    ivalue = int(value)
-    if ivalue < 5:
-        raise ArgumentTypeError("Timeout cannot be lower than 5 seconds")
-    return ivalue
-
-if __name__ == '__main__':
-    parser = ArgumentParser(description='A super simple multithreaded proxy scraper; scraping & checking ~80k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.')
-    parser.add_argument('-u', '--update', action='store_true', help='update project')
-    parser.add_argument('-v', '--validate', choices=['T', 'F'], help='validate proxies (T/F)')
-    parser.add_argument('-th', '--threads', type=validate_positive_integer, default=100, help='number of threads to use, default is 100')
-    parser.add_argument('-ti', '--timeout', type=validate_timeout, help='set the number of seconds for the default timeout (cannot be lower than 5 seconds)')
-    parser.add_argument('-y', action='store_true', help='continue without prompts')
+def main():
+    parser = argparse.ArgumentParser(description='A super simple multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.')
+    parser.add_argument('--validate', '-v', action='store_true', help='Flag to validate proxies after scraping (default: False)')
+    parser.add_argument('--update', '-u', action='store_true', help='Flag to run the update script and then exit')
 
     args = parser.parse_args()
+    
+    if args.update:
+        run_update_script()
+        return
+    
+    if args.validate:
+        print("Error: The '--validate' flag cannot be used in conjunction with the '--update' flag.")
+        return
+    
+    init()
+    banner()
+    proxies = proxy_sources()
+    
+    validate_proxies(proxies)
+    
+    proxy_scrape()
+    proxy_clean('output/HTTP.txt', 'output/HTTPS.txt', 'output/SOCKS4.txt', 'output/SOCKS5.txt')
+    
+    if args.validate:
+        http_check('output/HTTP.txt')
+        https_check('output/HTTPS.txt')
+    
+    print("\n[+] proXXy has finished validating, scraping, and sanitizing proxies.\n")
+    print(vanity_line())
 
-    terminal_width = get_terminal_size().columns
-    dash = "—"
-    dashes = dash * (terminal_width - 2)
-    vanity_line = f"<{dashes}>"
-
-    try:
-        if len(argv) == 1:
-            parameters()
-        elif args.update:
-            system('cls' if name == 'nt' else 'clear')
-            print(vanity_line)
-            run_update_script()
-        else:
-            prox_check = args.validate == 'T'
-            if args.validate == 'T' and (args.threads is None or args.timeout is None):
-                print("Error: If you use -vT, you must provide -th and -ti flags.")
-                exit(1)
-
-            if args.validate == 'T' and not args.y:
-                print(vanity_line)
-                print(f"Selected options:\n")
-                print(f" -- Proxy check: {args.validate == 'T'}")
-                print(f" -- Threads: {args.threads or 100}")
-                print(f" -- Timeout: {args.timeout or 10}")
-                print(vanity_line)
-                confirm_input = input("\nDo you want to continue? (Y/n): ").lower()
-                # Check user's confirmation
-                if confirm_input == "n":
-                    exit(1)
-            main(args.timeout)
-    except ArgumentError:
-        parser.print_help()
-    except KeyboardInterrupt:
-        exit_con()
-4
+if __name__ == "__main__":
+    main()

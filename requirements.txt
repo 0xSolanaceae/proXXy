@@ -3,3 +3,4 @@ yaspin==3.0.1
 scrapy==2.11.1
 tqdm==4.66.2
 hrequests[all]
+orjson>=3.9.15 # not directly required, pinned by Snyk to avoid a vulnerability

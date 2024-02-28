@@ -1,3 +1,6 @@
+# cython: language_level=3
+# -*- coding: utf-8 -*-
+
 import requests
 import time
 import logging

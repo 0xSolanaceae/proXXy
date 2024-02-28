@@ -1,1 +1,1 @@
-proxy_check.c linguist-vendored
+*.c linguist-generated=true

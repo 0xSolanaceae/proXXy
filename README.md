@@ -61,24 +61,27 @@ along with an error output file titled `error.log` denoting the sources that wer
 The basic syntax for running proXXy is as follows:
 
 ```python
-usage: proXXy.py [-h] [--validate] [--update]
+usage: proXXy.py [-h] [--validate] [--update] [--version]
 ```
 
 1. `-v, --validate`: Use this flag to enable proxy validation. The scraper will attempt to validate the scraped proxies by checking their accessibility. Allow the program to complete the checking of HTTP & HTTPS proxies, then check the updated text files located in `output/` directory! (Please allow for up to 10 minutes for proxies to validate, depending on your hardware.)
 
 2. `-u, --update`: This flag updates the project. Cannot be used in conjunction with any other flag.
 
-3. `-h, --help`: Use this flag to spit out a help menu:
+3. `-h, --help`: Use this flag to spit out a help menu.
+
+4. `-V, --version`: Use this flag to spit out `proXXy.py`'s version.
 
 ```bash
-usage: proXXy.py [-h] [--validate] [--update]
+usage: proXXy.py [-h] [--validate] [--update] [--version]
 
-A super simple multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.
+A super simple multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4 & SOCKS5 proxies.
 
 options:
   -h, --help      show this help message and exit
   --validate, -v  Flag to validate proxies after scraping (default: False)
   --update, -u    Flag to run the update script and then exit
+  --version, -V   Print the version of the script and exit
 ```
 
 ## Planned Features
@@ -90,25 +93,14 @@ options:
 
 ## Support
 
-Need help and can't get it to run correctly? Open an issue or contact me [here](https://solanaceae.xyz/)
+Need help and can't get it to run correctly? Open an issue or contact me [here](https://solanaceae.xyz/).
 
 ## Changelog
 
-[Release v2.1](https://github.com/Atropa-Solanaceae/proXXy/releases/tag/v2.1)
-- Refactored the entire codebase for improved readability and maintainability.
-- Reorganized code into modular functions and classes for better organization.
-- Removed unnecessary imports and redundant code.
-- Utilized Python libraries like `yaspin` for enhanced CLI interaction.
-- Implemented error logging for better error handling and debugging.
-- Introduced a new `init()` function to initialize the application and provide visual feedback.
-- Added support for command-line arguments using the `argparse` module.
-- Implemented proxy validation after scraping using the `--validate` flag.
-- Improved proxy scraping process by using Scrapy for better efficiency.
-- Added functionality to remove duplicate proxies and filter out specific ports.
-- Enhanced user feedback with informative messages and progress indicators.
-- Updated the update script functionality for better cross-platform support.
-- Generated a new `validated` directory to store validated proxies.
-- Updated the `README.md` file to reflect changes and provide usage instructions.
+[Release v2.2](https://github.com/Atropa-Solanaceae/proXXy/releases/tag/v2.2)
+- Added a `--version, -V` flag
+- Segmented resources into seperate files
+- Further modularized code, more to come shortly 
 
 
 ---

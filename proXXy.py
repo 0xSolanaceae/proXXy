@@ -155,24 +155,11 @@ def proxy_clean(http_file, https_file, socks4_file, socks5_file):
 
         with open(output_file, 'w') as file:
             file.writelines(unique_proxies)
-    
-    def port_filter(input_file, output_file):
-        with open(input_file, 'r') as file:
-            lines = file.readlines()
-
-        filtered_lines = [line.strip() for line in lines if not (line.strip().endswith(":1080") or line.strip().endswith(":5555"))]
-
-        with open(input_file, 'w') as output_file:
-            output_file.write('\n'.join(filtered_lines))
 
     remove_duplicates(http_file, http_file)
     remove_duplicates(https_file, https_file)
     remove_duplicates(socks4_file, socks4_file)
     remove_duplicates(socks5_file, socks5_file)
-    port_filter(http_file, http_file)
-    port_filter(https_file, https_file)
-    port_filter(socks4_file, socks4_file)
-    port_filter(socks5_file, socks5_file)
 
     http_lines = count_lines('output/HTTP.txt')
     https_lines = count_lines('output/HTTPS.txt')
@@ -196,7 +183,7 @@ def run_update_script():
     elif current_os == 'Windows':
         subprocess.run(['update.bat'])
     else:
-        print('Unsupported operating system.')
+        print('[-] Unsupported operating system.')
 
 def main():
     parser = argparse.ArgumentParser(description='A super simple asynchronous multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.')

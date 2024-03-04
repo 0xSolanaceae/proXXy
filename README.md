@@ -75,7 +75,8 @@ usage: proXXy.py [-h] [--validate] [--update] [--version]
 ```bash
 usage: proXXy.py [-h] [--validate] [--update] [--version]
 
-A super simple multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4 & SOCKS5 proxies.
+A super simple asynchronous multithreaded proxy scraper;
+scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.
 
 options:
   -h, --help      show this help message and exit
@@ -95,13 +96,17 @@ options:
 
 Need help and can't get it to run correctly? Open an issue or contact me [here](https://solanaceae.xyz/).
 
+## Sponsorship
+
+If you like what I do, buy me a coffee so I can continue developing this tool and others!
+[Ko-Fi](https://ko-fi.com/solanaceae)
+
 ## Changelog
 
 [Release v2.2](https://github.com/Atropa-Solanaceae/proXXy/releases/tag/v2.2)
 - Added a `--version, -V` flag
 - Segmented resources into separate files
 - Further modularized code, more to come shortly 
-
 
 ---
 ## License

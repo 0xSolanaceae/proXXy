@@ -103,10 +103,11 @@ If you like what I do, buy me a coffee so I can continue developing this tool an
 
 ## Changelog
 
-[Release v2.2](https://github.com/Atropa-Solanaceae/proXXy/releases/tag/v2.2)
+[Release v2.3](https://github.com/Atropa-Solanaceae/proXXy/releases/tag/v2.3)
 - Added a `--version, -V` flag
 - Segmented resources into separate files
-- Further modularized code, more to come shortly 
+- Further modularized code, more to come shortly
+- Fixed build issues
 
 ---
 ## License

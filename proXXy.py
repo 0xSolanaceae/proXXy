@@ -8,13 +8,12 @@ import pystyle
 import logging
 import argparse
 import subprocess
+import utils
 from yaspin import yaspin
 from hrequests import session
 from scrapy import Spider, Request
-from proxy_sources import proxy_sources
 from scrapy.crawler import CrawlerProcess
 from platform import system as platform_system
-from proxy_check import http_check, https_check
 
 def banner():
     banner = r"""
@@ -103,7 +102,7 @@ class ProxySpider(Spider):
     }
 
     def start_requests(self):
-            sources = proxy_sources()
+            sources = utils.cproxy_sources()
             for protocol, urls in sources.items():
                 for url in urls:
                     try:
@@ -200,17 +199,14 @@ def run_update_script():
         print('Unsupported operating system.')
 
 def main():
-    parser = argparse.ArgumentParser(description='A super simple multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.')
+    parser = argparse.ArgumentParser(description='A super simple asynchronous multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.')
     parser.add_argument('--validate', '-v', action='store_true', help='Flag to validate proxies after scraping (default: False)')
     parser.add_argument('--update', '-u', action='store_true', help='Flag to run the update script and then exit')
-    parser.add_argument('--version', '-V', action='version', version='%(prog)s v2.2', help='Print the version of the script and exit')
+    parser.add_argument('--version', '-V', action='version', version='%(prog)s v2.3', help='Print the version of the script and exit')
     args = parser.parse_args()
     
     if args.update:
         run_update_script()
-        return
-    
-    if args.version:
         return
     
     if args.validate and args.update:
@@ -219,7 +215,7 @@ def main():
     
     init()
     banner()
-    proxies = proxy_sources()
+    proxies = utils.cproxy_sources()
     
     validate_proxies(proxies)
     
@@ -227,8 +223,8 @@ def main():
     proxy_clean('output/HTTP.txt', 'output/HTTPS.txt', 'output/SOCKS4.txt', 'output/SOCKS5.txt')
     
     if args.validate:
-        http_check('output/HTTP.txt')
-        https_check('output/HTTPS.txt')
+        utils.chttp_check('output/HTTP.txt')
+        utils.chttps_check('output/HTTPS.txt')
     
     print("\n[+] proXXy has finished validating, scraping, and sanitizing proxies.\n")
     print(vanity_line())

@@ -99,7 +99,7 @@ Need help and can't get it to run correctly? Open an issue or contact me [here](
 
 [Release v2.2](https://github.com/Atropa-Solanaceae/proXXy/releases/tag/v2.2)
 - Added a `--version, -V` flag
-- Segmented resources into seperate files
+- Segmented resources into separate files
 - Further modularized code, more to come shortly 
 
 

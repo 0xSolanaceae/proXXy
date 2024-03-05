@@ -189,7 +189,7 @@ def main():
     parser = argparse.ArgumentParser(description='A super simple asynchronous multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.')
     parser.add_argument('--validate', '-v', action='store_true', help='Flag to validate proxies after scraping (default: False)')
     parser.add_argument('--update', '-u', action='store_true', help='Flag to run the update script and then exit')
-    parser.add_argument('--version', '-V', action='version', version='%(prog)s v2.3', help='Print the version of the script and exit')
+    parser.add_argument('--version', '-V', action='version', version='%(prog)s v2.4', help='Print the version of the script and exit')
     args = parser.parse_args()
     
     if args.update:

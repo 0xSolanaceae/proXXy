@@ -87,7 +87,7 @@ options:
 
 ## Planned Features
 
-- Fix Linux compatibility errors. `proXXy` currently does not support Linux exection, solely Windows-based systems.
+- Fix Linux compatibility errors. `proXXy` currently does not support Linux verification, solely Windows-based systems.
 - Allow the user to choose the number of threads they'd like to use with flags, & provide the user recommended values based on their hardware.
 - Implement SOCKS4 & SOCKS5 testing.
 - Proxy sorting instead of hardcoding.

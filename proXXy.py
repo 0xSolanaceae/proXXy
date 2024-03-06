@@ -3,17 +3,17 @@
 import os
 import re
 import time
+import utils
 import shutil
 import pystyle
 import logging
 import argparse
+import platform
 import subprocess
-import utils
 from yaspin import yaspin
 from hrequests import session
 from scrapy import Spider, Request
 from scrapy.crawler import CrawlerProcess
-from platform import system as platform_system
 
 def banner():
     banner = r"""
@@ -172,16 +172,16 @@ def proxy_clean(http_file, https_file, socks4_file, socks5_file):
     print(vanity_line())
 
 def run_update_script():
-    current_os = platform_system()
-    if (
-        current_os == 'Linux'
-        or current_os != 'Windows'
-        and current_os == 'Darwin'
-    ):
-        subprocess.run(['chmod', '+x', 'update.sh'])
-        subprocess.run(['./update.sh'])
+    current_os = platform.system()
+    update_folder = os.path.join(os.path.dirname(__file__), 'update')
+
+    if current_os == 'Linux' or current_os == 'Darwin':
+        update_script = os.path.join(update_folder, 'update.sh')
+        subprocess.run(['chmod', '+x', update_script], check=True)
+        subprocess.run([update_script], check=True)
     elif current_os == 'Windows':
-        subprocess.run(['update.bat'])
+        update_script = os.path.join(update_folder, 'update.bat')
+        subprocess.run([update_script], check=True)
     else:
         print('[-] Unsupported operating system.')
 

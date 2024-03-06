@@ -40,7 +40,7 @@ def vanity_line():
 
 def init():
     os.system('cls' if os.name == 'nt' else 'clear')
-    logging.basicConfig(filename='error.log', level=logging.ERROR)
+    logging.basicConfig(filename='output/error.log', level=logging.ERROR)
     with yaspin().bouncingBar as sp:
         sp.text = "Initializing..."
         time.sleep(2.5)

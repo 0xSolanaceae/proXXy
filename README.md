@@ -110,4 +110,4 @@ If you like what I do, buy me a coffee so I can continue developing this tool an
 ---
 ## License
 
-This project is licensed under the MIT License. See the `LICENSE` file for more information.
+This project is licensed under the GNU General Public License v3.0 License. See the `LICENSE` file for more information.

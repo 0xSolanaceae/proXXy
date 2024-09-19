@@ -104,12 +104,8 @@ If you like what I do, buy me a coffee so I can continue developing this tool an
 
 ## Changelog
 
-[Release v2.4](https://github.com/Atropa-Solanaceae/proXXy/releases/tag/v2.4)
-- Added a `--version, -V` flag
-- Segmented resources into separate files
-- Further modularized code, more to come shortly
-- Fixed build issues
-- Linux compatibility changes
+[Release v2.5](https://github.com/Atropa-Solanaceae/proXXy/releases/tag/v2.5)
+- Full changelog: https://github.com/Atropa-Solanaceae/proXXy/compare/v2.4...v2.5
 
 ---
 ## License

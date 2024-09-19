@@ -1,12 +1,13 @@
 # cython: language_level=3
 # -*- coding: utf-8 -*-
 
-import requests
+import os
+import json
 import time
 import logging
-import os
-from yaspin import yaspin
+import requests
 from tqdm import tqdm
+from yaspin import yaspin
 from concurrent.futures import ThreadPoolExecutor
 
 cpdef dict cproxy_sources():
@@ -112,8 +113,25 @@ cpdef dict cproxy_sources():
         ]
     }
 
-def chttp_check(PROXY_LIST_FILE):
-    TEST_URL = "http://httpbin.org/ip"
+import os
+import json
+import time
+import logging
+import requests
+from tqdm import tqdm
+from yaspin import yaspin
+from concurrent.futures import ThreadPoolExecutor
+
+def load_proxy_sources(file_path):
+    with open(file_path, 'r') as file:
+        return json.load(file)
+
+def proxy_sources():
+    return load_proxy_sources('proxy_sources.json')
+
+def http_check(PROXY_LIST_FILE): 
+    # combine two methods into one, so that when it's called it'll differentiate based upon what type of proxy parameter is fed into it
+    TEST_URL = "http://httpbin.org/ip" #https://httpbin.org/anything #https://api.myip.com/ #FIXME add in time to reach judge sites in milliseconds
     TIMEOUT = 5
     logging.basicConfig(filename='error.log', level=logging.ERROR)
 
@@ -134,7 +152,7 @@ def chttp_check(PROXY_LIST_FILE):
             http_proxies = [line.strip() for line in f.readlines()]
         
         cpu_count = os.cpu_count()
-        max_threads = cpu_count * 450
+        max_threads = cpu_count * 420
         if not max_threads:
             max_threads = 1000
 
@@ -168,8 +186,10 @@ def chttp_check(PROXY_LIST_FILE):
                 f.write(proxy + '\n')
     main()
     
-def chttps_check(PROXY_LIST_FILE):
-    TEST_URL = "https://httpbin.org/ip"
+def https_check(PROXY_LIST_FILE):
+    #FIXME tell the user the anonymity level of the proxy
+    #FIXME add in socks4/5 verification
+    TEST_URL = "https://api.myip.com:443/"
     TIMEOUT = 5
     logging.basicConfig(filename='error.log', level=logging.ERROR)
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+#FIXME apply changes done to update.ps1
 
 echo "[*] Updating proXXy..."
 

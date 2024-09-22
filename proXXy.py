@@ -101,9 +101,9 @@ def validate_proxies(proxy_sources, output_dir="validated", timeout=5):
 
             try:
                 response_time_ms = round(response.elapsed.total_seconds() * 1000, 1)
-                
+
                 if response.status_code == 200:
-                    print(pystyle.Colorate.Color(pystyle.Colors.green, f"[+] VALID: {cleaned_url}", True) + f" || {response_time_ms:,} ms")
+                    print(f'{pystyle.Colorate.Color(pystyle.Colors.green, f"[+] VALID: {cleaned_url}", True)} || {response_time_ms:,} ms')
                     valid_urls[protocol].append({'url': url, 'response_time_ms': response_time_ms})
                 else:
                     print(pystyle.Colorate.Color(pystyle.Colors.red, f"[-] INVALID: {cleaned_url}", True) + "| ERROR")

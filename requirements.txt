@@ -1,6 +1,0 @@
-pystyle==2.9
-yaspin==3.0.1
-scrapy==2.11.1
-tqdm==4.66.2
-PyYAML==6.0
-hrequests[all]

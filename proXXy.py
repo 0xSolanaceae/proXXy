@@ -106,13 +106,15 @@ def validate_proxies(proxy_sources, output_dir="validated", timeout=5):
                     print(f'{pystyle.Colorate.Color(pystyle.Colors.green, f"[+] VALID: {cleaned_url}", True)} || {response_time_ms:,} ms')
                     valid_urls[protocol].append({'url': url, 'response_time_ms': response_time_ms})
                 else:
-                    print(pystyle.Colorate.Color(pystyle.Colors.red, f"[-] INVALID: {cleaned_url}", True) + "| ERROR")
+                    print(f'{pystyle.Colorate.Color(pystyle.Colors.red, f"[-] INVALID: {cleaned_url}", True)}| ERROR')
                     invalid_urls[protocol].append({'url': url, 'response_time_ms': response_time_ms})
 
                 time.sleep(0.05)
             except Exception as e:
                 logging.error(f"Error processing URL {url}: {e}")
-                print(pystyle.Colorate.Color(pystyle.Colors.red, f"[-] INVALID: {cleaned_url}", True) + "| ERROR")
+                print(
+                    f'{pystyle.Colorate.Color(pystyle.Colors.red, f"[-] INVALID: {cleaned_url}", True)}| ERROR'
+                )
                 invalid_urls[protocol].append({'url': url, 'response_time_ms': None})
 
         time.sleep(0.5)

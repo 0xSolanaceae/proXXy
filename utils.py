@@ -72,8 +72,8 @@ def http_check(PROXY_LIST_FILE):
     main()
     
 def https_check(PROXY_LIST_FILE):
-    #FIXME tell the user the anonymity level of the proxy
-    #FIXME add in socks4/5 verification
+    # FIXME tell the user the anonymity level of the proxy
+    # FIXME add in socks4/5 verification
     TEST_URL = "https://api.myip.com:443/"
     TIMEOUT = 5
     logging.basicConfig(filename='error.log', level=logging.ERROR)

@@ -1,0 +1,22 @@
+[tool.poetry]
+package-mode = false
+name = "proXXy"
+version = "v2.6"
+description = "A super simple asynchronous multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies."
+authors = ["Solanaceae"]
+license = "GPL-3.0 license"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pystyle = "^2.9"
+yaspin = "^3.1.0"
+Scrapy = "^2.11.2"
+tqdm = "^4.66.5"
+PyYAML = "^6.0"
+hrequests = "^0.8.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -2,7 +2,7 @@
 
 <div align="center">
   <p align="center">
-    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=200&size=70&duration=2000&pause=2000&color=946df7&center=true&vCenter=true&width=1000&height=150&lines=<|———|> proXXy <|———|>" alt="proXXy typing out"/>
+    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=200&size=70&duration=1500&pause=4000&color=946df7&center=true&vCenter=true&width=1000&height=150&lines=<|————— proXXy —————|>" alt="proXXy typing out"/>
   </p>
   
   <p align="center">
@@ -34,21 +34,29 @@ git clone https://github.com/Atropa-Solanaceae/proXXy.git
 cd proXXy
 ```
 
-- Install the required dependencies:
+- Install the required dependencies using `poetry`:
 
 ```bash
-pip3 install -r requirements.txt
+poetry install
 ```
+
+If you don't have `poetry` installed, you can install it by following the instructions [here](https://python-poetry.org/docs/#installation).
 
 ## Usage
 
-- Running the program without flags results in only scraping, as checking is disabled by default.
+- Activate the poetry shell before running the program:
 
-```python
+```bash
+poetry shell
+```
+
+- Running the program without flags results in only scraping, as checking is disabled by default:
+
+```bash
 python3 proXXy.py
 ```
 
-The program will output four files in the project directory containing the regularized proxy lists:
+The program will output four files in the `/output` directory with the proxy lists:
 
 - `HTTP.txt`
 - `HTTPS.txt`
@@ -56,15 +64,16 @@ The program will output four files in the project directory containing the regul
 - `SOCKS5.txt`
 
 along with an error output file titled `error.log` denoting the sources that were unable to be accessed.
+
 ## Flags
 
 The basic syntax for running proXXy is as follows:
 
-```python
+```bash
 usage: proXXy.py [-h] [--validate] [--update] [--version]
 ```
 
-1. `-v, --validate`: Use this flag to enable proxy validation. The scraper will attempt to validate the scraped proxies by checking their accessibility. Allow the program to complete the checking of HTTP & HTTPS proxies, then check the updated text files located in `output/` directory! (Please allow for up to 10 minutes for proxies to validate, depending on your hardware.)
+1. `-v, --validate`: Use this flag to enable proxy validation. The scraper will attempt to validate the scraped proxies by checking their accessibility. Allow the program to complete the checking of HTTP & HTTPS proxies, then check the updated text files located in the `output/` directory! (Please allow for up to 10 minutes for proxies to validate, depending on your hardware.)
 
 2. `-u, --update`: This flag updates the project. Cannot be used in conjunction with any other flag.
 
@@ -87,7 +96,8 @@ options:
 
 ## Planned Features
 
-- Fix Linux compatibility errors. `proXXy` currently does not support Linux verification, solely Windows-based systems.
+- Add URL rotation
+- Fix Unix-like compatibility errors. `proXXy` currently does not support unix-like verification.
 - Allow the user to choose the number of threads they'd like to use with flags, & provide the user recommended values based on their hardware.
 - Implement SOCKS4 & SOCKS5 testing.
 - Proxy sorting instead of hardcoding.
@@ -104,10 +114,12 @@ If you like what I do, buy me a coffee so I can continue developing this tool an
 
 ## Changelog
 
-[Release v2.5](https://github.com/Atropa-Solanaceae/proXXy/releases/tag/v2.5)
-- Full changelog: https://github.com/Atropa-Solanaceae/proXXy/compare/v2.4...v2.5
+[Release v2.6](https://github.com/Atropa-Solanaceae/proXXy/releases/tag/v2.6)
+- Full changelog: https://github.com/Atropa-Solanaceae/proXXy/compare/v2.5...v2.6
 
 ---
+
 ## License
 
 This project is licensed under the GNU General Public License v3.0 License. See the `LICENSE` file for more information.
+```

@@ -2,6 +2,7 @@
 # Built by Solanaceae -- https://solanaceae.xyz/
 import os
 import re
+import json
 import time
 import yaml
 import utils
@@ -261,9 +262,33 @@ def run_update_script(script_version):
         logging.error(f"Failed to run update script: {e}")
         print("[-] Update failed. Check logs for details.")
 
+def check_for_update(script_version):
+    banner(script_version)
+    api_url = f"https://api.github.com/repos/Atropa-Solanaceae/proXXy/releases/latest"
+    
+    try:
+        response = hrequests.get(api_url)
+        
+        if response.status_code == 200:
+            release_info = json.loads(response.text)
+            latest_version = release_info['tag_name']
+            
+            if script_version < latest_version:
+                print(f"[+] A new version is available: {latest_version}. You are running {script_version}.")
+                print("[+] Please update your script to the latest version by using the -u flag.")
+                return True
+            else:
+                return False
+        else:
+            print(f"[-] Failed to check for updates. HTTP Status Code: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"[-] Error checking for updates: {e}")
+        return False
+    
 def main():
     global script_version
-    script_version = 'v2.5'
+    script_version = 'v2.6'
     parser = argparse.ArgumentParser(description='A super simple asynchronous multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.')
     parser.add_argument('--validate', '-v', action='store_true', help='Flag to validate proxies after scraping (default: False)')
     parser.add_argument('--update', '-u', action='store_true', help='Flag to run the update script and then exit')
@@ -278,7 +303,10 @@ def main():
         print("Error: The '--validate' flag cannot be used in conjunction with the '--update' flag.")
         return
     
-    for filename in ['output/HTTP.txt', 'output/HTTPS.txt', 'output/SOCKS4.txt', 'output/SOCKS5.txt']: open(filename, 'w').close() # Clear output files
+    if check_for_update(script_version):
+        time.sleep(2.5)
+
+    for filename in ['output/HTTP.txt', 'output/HTTPS.txt', 'output/SOCKS4.txt', 'output/SOCKS5.txt']: open(filename, 'w').close()
 
     init_logging()
     init_spinner()

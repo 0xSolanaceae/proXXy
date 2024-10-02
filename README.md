@@ -109,7 +109,7 @@ Need help and can't get it to run correctly? Open an issue or contact me [here](
 
 ## Sponsorship
 
-If you like what I do, buy me a coffee so I can continue developing this tool and others!
+If you like what I do, buy me boba so I can continue developing this tool and others!
 [Ko-Fi](https://ko-fi.com/solanaceae)
 
 ## Changelog

@@ -12,9 +12,9 @@ python = "^3.10"
 pystyle = "^2.9"
 yaspin = "^3.1.0"
 Scrapy = "^2.11.2"
-tqdm = "^4.66.5"
-PyYAML = "^6.0"
-hrequests = "^0.8.2"
+tqdm = "^4.67.0"
+PyYAML = "^6.0.2"
+hrequests = "^0.9.1"
 
 
 [build-system]

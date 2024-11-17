@@ -114,8 +114,8 @@ If you like what I do, buy me boba so I can continue developing this tool and ot
 
 ## Changelog
 
-[Release v2.6](https://github.com/Atropa-Solanaceae/proXXy/releases/tag/v2.6)
-- Full changelog: https://github.com/Atropa-Solanaceae/proXXy/compare/v2.5...v2.6
+[Release v2.6](https://github.com/0xSolanaceae/proXXy/releases/tag/v2.6)
+- Full changelog: https://github.com/0xSolanaceae/proXXy/compare/v2.5...v2.6
 
 ---
 

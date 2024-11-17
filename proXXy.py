@@ -213,10 +213,10 @@ def count_lines(file_path):
     if not os.path.isfile(file_path):
         logging.error(f"File not found: {file_path}")
         return 0
-    
+
     try:
         with open(file_path, 'r') as file:
-            return sum(1 for line in file)
+            return sum(1 for _ in file)
     except IOError as e:
         logging.error(f"Error reading file {file_path}: {e}")
         return 0
@@ -266,27 +266,30 @@ def run_update_script(script_version):
 
 def check_for_update(script_version):
     banner(script_version)
-    api_url = f"https://api.github.com/repos/Atropa-Solanaceae/proXXy/releases/latest"
-    
+    api_url = (
+        "https://api.github.com/repos/Atropa-Solanaceae/proXXy/releases/latest"
+    )
+
     try:
         response = hrequests.get(api_url)
-        
+
         if response.status_code == 200:
-            release_info = json.loads(response.text)
-            latest_version = release_info['tag_name']
-            
-            if script_version < latest_version:
-                print(f"[+] A new version is available: {latest_version}. You are running {script_version}.")
-                print("[+] Please update your script to the latest version by using the -u flag.")
-                return True
-            else:
-                return False
-        else:
-            print(f"[-] Failed to check for updates. HTTP Status Code: {response.status_code}")
-            return False
+            return update_notif(response, script_version)
+        print(f"[-] Failed to check for updates. HTTP Status Code: {response.status_code}")
+        return False
     except Exception as e:
         print(f"[-] Error checking for updates: {e}")
         return False
+
+def update_notif(response, script_version):
+    release_info = json.loads(response.text)
+    latest_version = release_info['tag_name']
+
+    if script_version >= latest_version:
+        return False
+    print(f"[+] A new version is available: {latest_version}. You are running {script_version}.")
+    print("[+] Please update your script to the latest version by using the -u flag.")
+    return True
     
 def main():
     global script_version
@@ -296,15 +299,11 @@ def main():
     parser.add_argument('--update', '-u', action='store_true', help='Flag to run the update script and then exit')
     parser.add_argument('--version', '-V', action='version', version=f'%(prog)s {script_version}', help='Print the version of the script and exit')
     args = parser.parse_args()
-    
+
     if args.update:
         run_update_script(script_version)
         return
-    
-    if args.validate and args.update:
-        print("Error: The '--validate' flag cannot be used in conjunction with the '--update' flag.")
-        return
-    
+
     if check_for_update(script_version):
         time.sleep(2.5)
 
@@ -314,12 +313,12 @@ def main():
     init_spinner()
     banner(script_version)
     proxies = utils.proxy_sources()
-    
+
     validate_proxies(proxies)
-    
+
     proxy_scrape()
     proxy_clean('output/HTTP.txt', 'output/HTTPS.txt', 'output/SOCKS4.txt', 'output/SOCKS5.txt')
-    
+
     if args.validate:
         utils.http_check('output/HTTP.txt')
         utils.https_check('output/HTTPS.txt')

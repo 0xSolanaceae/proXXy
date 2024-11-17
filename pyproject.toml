@@ -15,6 +15,7 @@ Scrapy = "^2.11.2"
 tqdm = "^4.67.0"
 PyYAML = "^6.0.2"
 hrequests = "^0.9.1"
+aiohttp = "^3.11.2"
 
 
 [build-system]

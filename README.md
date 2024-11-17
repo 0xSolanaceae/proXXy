@@ -28,23 +28,23 @@
 git clone https://github.com/Atropa-Solanaceae/proXXy.git
 ```
 
-- Navigate to the project directory:
+- Navigate to project directory:
 
 ```bash
 cd proXXy
 ```
 
-- Install the required dependencies using `poetry`:
+- Install dependencies with `poetry`:
 
 ```bash
 poetry install
 ```
 
-If you don't have `poetry` installed, you can install it by following the instructions [here](https://python-poetry.org/docs/#installation).
+If you don't have `poetry` installed, install it [here](https://python-poetry.org/docs/#installation).
 
 ## Usage
 
-- Activate the poetry shell before running the program:
+- Activate the poetry shell:
 
 ```bash
 poetry shell
@@ -56,24 +56,24 @@ poetry shell
 python3 proXXy.py
 ```
 
-The program will output four files in the `/output` directory with the proxy lists:
+The program will modify four files in the `output/` directory with your proxies:
 
 - `HTTP.txt`
 - `HTTPS.txt`
 - `SOCKS4.txt`
 - `SOCKS5.txt`
 
-along with an error output file titled `error.log` denoting the sources that were unable to be accessed.
+ with a logfile (`error.log`) with warnings/errors.
 
 ## Flags
 
-The basic syntax for running proXXy is as follows:
+Syntax for running proXXy is as follows:
 
 ```bash
 usage: proXXy.py [-h] [--validate] [--update] [--version]
 ```
 
-1. `-v, --validate`: Use this flag to enable proxy validation. The scraper will attempt to validate the scraped proxies by checking their accessibility. Allow the program to complete the checking of HTTP & HTTPS proxies, then check the updated text files located in the `output/` directory! (Please allow for up to 10 minutes for proxies to validate, depending on your hardware.)
+1. `-v, --validate`: This flag enables proxy validation. The scraper will look to validate the scraped proxies by checking their accessibility.
 
 2. `-u, --update`: This flag updates the project. Cannot be used in conjunction with any other flag.
 
@@ -81,8 +81,10 @@ usage: proXXy.py [-h] [--validate] [--update] [--version]
 
 4. `-V, --version`: Use this flag to spit out `proXXy.py`'s version.
 
+5. `-s, --src_check`: Use this flag to categorize the sources according to how many proxies they provide.
+
 ```bash
-usage: proXXy.py [-h] [--validate] [--update] [--version]
+usage: proXXy.py [-h] [--validate] [--update] [--version] [--src_check]
 
 A super simple asynchronous multithreaded proxy scraper;
 scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.
@@ -92,6 +94,7 @@ options:
   --validate, -v  Flag to validate proxies after scraping (default: False)
   --update, -u    Flag to run the update script and then exit
   --version, -V   Print the version of the script and exit
+  --src_check, -s Flag to verify sources
 ```
 
 ## Planned Features

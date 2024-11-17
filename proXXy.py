@@ -13,6 +13,7 @@ import logging
 import argparse
 import platform
 import hrequests
+import src_check
 import subprocess
 from yaspin import yaspin
 from urllib.parse import urlparse
@@ -298,6 +299,7 @@ def main():
     parser.add_argument('--validate', '-v', action='store_true', help='Flag to validate proxies after scraping (default: False)')
     parser.add_argument('--update', '-u', action='store_true', help='Flag to run the update script and then exit')
     parser.add_argument('--version', '-V', action='version', version=f'%(prog)s {script_version}', help='Print the version of the script and exit')
+    parser.add_argument('--src_check', '-s', action='store_true', help='Flag to verify sources')
     args = parser.parse_args()
 
     if args.update:
@@ -306,6 +308,10 @@ def main():
 
     if check_for_update(script_version):
         time.sleep(2.5)
+        
+    if args.src_check:
+        src_check.main()
+        return
 
     for filename in ['output/HTTP.txt', 'output/HTTPS.txt', 'output/SOCKS4.txt', 'output/SOCKS5.txt']: open(filename, 'w').close()
 

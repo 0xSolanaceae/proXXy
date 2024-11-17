@@ -1,3 +1,7 @@
+# project directories
+output/
+validated/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -1,0 +1,60 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'libvirt'
+
+Vagrant.configure("2") do |config|
+
+    hostname = "winbox"
+    locale = "en_GB.UTF.8"
+
+    config.vm.box = "peru/windows-10-enterprise-x64-eval"
+
+    config.vm.provider "libvirt" do |v|
+        v.memory = 2048
+        v.cpus = 4
+    end
+    
+    config.vm.provision "shell", inline: <<-SHELL
+        Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+        
+        # upgrade choco
+        choco upgrade chocolatey -y
+        choco config set commandExecutionTimeoutSeconds 2700
+
+        # install scoop
+        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+        iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
+
+        # dev tools
+        $ErrorActionPreference = 'Stop'
+        $maxRetries = 3
+        $retryCount = 0
+        while ($retryCount -lt $maxRetries) {
+            try {
+                choco install git -y
+                choco install python -y
+                pip install pipx
+                pipx ensurepath
+                pipx install poetry
+                break
+            } catch {
+                Write-Host "Installation failed, retrying..."
+                $retryCount++
+                Start-Sleep -Seconds 10
+            }
+        }
+        
+        # pip update
+        python.exe -m pip install --upgrade pip
+
+        # clone repo
+        cd C:\\Users\\vagrant\\Desktop
+        try {
+            git clone https://github.com/0xSolanaceae/proXXy.git
+        } catch {
+            Write-Host "Clone failed, continuing..."
+        }
+
+    SHELL
+end

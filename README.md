@@ -70,7 +70,7 @@ The program will modify four files in the `output/` directory with your proxies:
 Syntax for running proXXy is as follows:
 
 ```bash
-usage: proXXy.py [-h] [--validate] [--update] [--version]
+usage: proXXy.py [-h] [--validate] [--update] [--version] [--src_check]
 ```
 
 1. `-V, --validate`: This flag enables proxy validation. The scraper will look to validate the scraped proxies by checking their accessibility.

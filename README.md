@@ -73,13 +73,13 @@ Syntax for running proXXy is as follows:
 usage: proXXy.py [-h] [--validate] [--update] [--version]
 ```
 
-1. `-v, --validate`: This flag enables proxy validation. The scraper will look to validate the scraped proxies by checking their accessibility.
+1. `-V, --validate`: This flag enables proxy validation. The scraper will look to validate the scraped proxies by checking their accessibility.
 
 2. `-u, --update`: This flag updates the project. Cannot be used in conjunction with any other flag.
 
 3. `-h, --help`: Use this flag to spit out a help menu.
 
-4. `-V, --version`: Use this flag to spit out `proXXy.py`'s version.
+4. `-v, --version`: Use this flag to spit out `proXXy.py`'s version.
 
 5. `-s, --src_check`: Use this flag to categorize the sources according to how many proxies they provide.
 

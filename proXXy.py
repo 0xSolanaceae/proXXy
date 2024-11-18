@@ -29,8 +29,8 @@ def banner(script_version):
  / .___/_/   \____/_/|_/_/|_\__, /  
 /_/                        /____/   """
 
-    os.system("title proXXy -- by Solanaceae")
-    os.system('cls' if os.name == 'nt' else 'clear')
+    clr_cmd = "cls" if os.name == "nt" else "clear"
+    os.system(f"title proXXy -- by Solanaceae && {clr_cmd}")
     text = f"{script_version}\nby Solanaceae\nhttps://solanaceae.xyz/"
     print(pystyle.Add.Add(banner, text, 4))
     print()
@@ -46,8 +46,12 @@ def vanity_line():
     return f"<{dashes}>"
 
 def init_logging():
+    log_dir = 'output'
+    log_file = os.path.join(log_dir, 'error.log')
+    os.makedirs(log_dir, exist_ok=True)
+    
     try:
-        logging.basicConfig(filename=os.path.join('output/error.log'), level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
+        logging.basicConfig(filename=log_file, level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
         logging.info("Application started.")
     except Exception as e:
         print(f"Failed to initialize logging: {e}")
@@ -157,11 +161,19 @@ def report_validation_summary(valid_file_path, invalid_file_path, start_time):
 
 class ProxySpider(Spider):
     name = 'proxy_spider'
+    user_agents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15",
+        "Mozilla/5.0 (Linux; Android 10; SM-G960F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Mobile Safari/537.36",
+        "Mozilla/5.0 (Linux; Ubuntu 20.04; rv:89.0) Gecko/20100101 Firefox/89.0"
+    ]
     custom_settings = {
         'LOG_LEVEL': 'ERROR', # https://docs.scrapy.org/en/latest/topics/logging.html
         'DOWNLOAD_TIMEOUT': 5,
         'RETRY_TIMES': 2,
         'RETRY_HTTP_CODES': [500, 502, 503, 504, 408],
+        'USER_AGENT': random.choice(user_agents),
     }
 
     def start_requests(self):
@@ -188,15 +200,7 @@ class ProxySpider(Spider):
 
 def proxy_scrape():
     global total_scraped
-    user_agents = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15",
-        "Mozilla/5.0 (Linux; Android 10; SM-G960F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Mobile Safari/537.36",
-        "Mozilla/5.0 (Linux; Ubuntu 20.04; rv:89.0) Gecko/20100101 Firefox/89.0"
-    ]
-
-    process = CrawlerProcess(settings={'USER_AGENT': random.choice(user_agents)})
+    process = CrawlerProcess()
     process.crawl(ProxySpider)
     process.start()
 
@@ -264,7 +268,7 @@ def run_update_script(script_version):
 def check_for_update(script_version):
     banner(script_version)
     api_url = (
-        "https://api.github.com/repos/Atropa-Solanaceae/proXXy/releases/latest"
+        "https://api.github.com/repos/0xSolanaceae/proXXy/releases/latest"
     )
 
     try:

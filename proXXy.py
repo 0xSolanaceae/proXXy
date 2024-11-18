@@ -46,10 +46,8 @@ def vanity_line():
     return f"<{dashes}>"
 
 def init_logging():
-    log_dir = 'output'
-    os.makedirs(log_dir, exist_ok=True)
     try:
-        logging.basicConfig(filename=os.path.join(log_dir, 'error.log'), level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
+        logging.basicConfig(filename=os.path.join('output/error.log'), level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
         logging.info("Application started.")
     except Exception as e:
         print(f"Failed to initialize logging: {e}")
@@ -156,8 +154,6 @@ def report_validation_summary(valid_file_path, invalid_file_path, start_time):
     print(vanity_line())
 
     logging.info(f"Validation summary: {accessed} valid URLs, {not_accessed} invalid URLs in {elapsed_time} seconds")
-
-
 
 class ProxySpider(Spider):
     name = 'proxy_spider'

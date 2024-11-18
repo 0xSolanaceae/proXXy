@@ -16,15 +16,12 @@ Vagrant.configure("2") do |config|
     end
     
     config.vm.provision "shell", inline: <<-SHELL
+        $env:PYTHON_KEYRING_BACKEND="keyring.backends.null.Keyring" # see https://stackoverflow.com/questions/74392324/poetry-install-throws-winerror-1312-when-running-over-ssh-on-windows-10
         Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
         
         # upgrade choco
         choco upgrade chocolatey -y
         choco config set commandExecutionTimeoutSeconds 2700
-
-        # install scoop
-        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-        iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
 
         # dev tools
         $ErrorActionPreference = 'Stop'
@@ -36,7 +33,9 @@ Vagrant.configure("2") do |config|
                 choco install python -y
                 pip install pipx
                 pipx ensurepath
-                pipx install poetry
+                pipx install poetry # if this fails, refer to line 19
+                # or put this in cmd:
+                # SET PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
                 break
             } catch {
                 Write-Host "Installation failed, retrying..."

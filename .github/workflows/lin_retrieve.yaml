@@ -1,4 +1,4 @@
-name: Run Script
+name: Linux Retrieval
 
 on:
   push:
@@ -31,6 +31,14 @@ jobs:
       run: |
         poetry run python proXXy.py
 
-    - name: Display invalid content
+    #- name: Validate proxies
+    #  run: |
+    #    poetry run python proXXy.py --validate
+
+    - name: Clean output directory
+      run: |
+        rm -rf output/*
+
+    - name: Print content
       run: |
         cat validated/INVALID.yaml

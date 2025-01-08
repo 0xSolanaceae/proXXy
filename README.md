@@ -99,8 +99,7 @@ options:
 
 ## Planned Features
 
-- Add URL rotation
-- Fix Unix-like compatibility errors. `proXXy` currently does not support unix-like verification.
+- Fix Unix-like compatibility errors. `proXXy` currently does not support unix-like proxy checking.
 - Allow the user to choose the number of threads they'd like to use with flags, & provide the user recommended values based on their hardware.
 - Implement SOCKS4 & SOCKS5 testing.
 - Proxy sorting instead of hardcoding.

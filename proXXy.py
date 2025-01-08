@@ -32,7 +32,7 @@ def banner(script_version):
     clr_cmd = "cls" if os.name == "nt" else "clear"
     if os.name == "nt":
         os.system(f"title proXXy -- by Solanaceae && {clr_cmd}")
-    else:
+    elif 'TERM' in os.environ:
         os.system(clr_cmd)
     text = f"{script_version}\nby Solanaceae\nhttps://solanaceae.xyz/"
     print(pystyle.Add.Add(banner, text, 4))

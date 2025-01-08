@@ -31,14 +31,18 @@ jobs:
       run: |
         poetry run python proXXy.py
 
-    #- name: Validate proxies
-    #  run: |
-    #    poetry run python proXXy.py --validate
-
-    - name: Clean output directory
+    - name: Validate proxies
       run: |
-        rm -rf output/*
+        poetry run python proXXy.py --validate
 
-    - name: Print content
+    - name: Print validity content
       run: |
         cat validated/INVALID.yaml
+        cat validated/VALID.yaml
+
+    - name: Print proxy output
+      run: |
+        cat output/HTTP.txt
+        cat output/HTTPS.txt
+        cat output/SOCKS4.txt
+        cat output/SOCKS5.txt

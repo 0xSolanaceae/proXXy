@@ -1,6 +1,6 @@
 # project directories
-output/
-validated/
+output/*
+validated/*
 
 # build files
 setup.py

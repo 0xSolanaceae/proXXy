@@ -31,6 +31,30 @@ jobs:
       run: |
         poetry run python proXXy.py
 
-    - name: Print content
+    - name: Validate proxies
       run: |
-        type validated\INVALID.yaml
+        poetry run python proXXy.py --validate
+
+    - name: Print invalid sources
+      run: |
+        type validated/INVALID.yaml
+      
+    - name: Print valid sources
+      run: |
+        type validated/VALID.yaml
+
+    - name: HTTP output
+      run: |
+        type output/HTTP.txt
+
+    - name: HTTPS output
+      run: |
+        type output/HTTPS.txt
+
+    - name: SOCKS4 output
+      run: |
+        type output/SOCKS4.txt
+      
+    - name: SOCKS5 output
+      run: |
+        type output/SOCKS5.txt

@@ -35,14 +35,26 @@ jobs:
       run: |
         poetry run python proXXy.py --validate
 
-    - name: Print validity content
+    - name: Print invalid sources
       run: |
         cat validated/INVALID.yaml
+      
+    - name: Print valid sources
+      run: |
         cat validated/VALID.yaml
 
-    - name: Print proxy output
+    - name: HTTP output
       run: |
         cat output/HTTP.txt
+
+    - name: HTTPS output
+      run: |
         cat output/HTTPS.txt
+
+    - name: SOCKS4 output
+      run: |
         cat output/SOCKS4.txt
+      
+    - name: SOCKS5 output
+      run: |
         cat output/SOCKS5.txt

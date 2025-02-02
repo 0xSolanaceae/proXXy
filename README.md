@@ -25,7 +25,7 @@
 - Clone the repository:
 
 ```bash
-git clone https://github.com/Atropa-Solanaceae/proXXy.git
+git clone https://github.com/0xSolanaceae/proXXy.git
 ```
 
 - Navigate to project directory:

@@ -2,8 +2,7 @@
 
 <div align="center">
   <p align="center">
-    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=200&size=70&duration=1500&pause=4000&color=946df7&center=true&vCenter=true&width=1000&height=150&lines=<|————— proXXy —————|>" alt="proXXy typing out"/>
-  </p>
+    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=70&duration=2000&pause=1000&color=946DF7&center=true&width=1000&height=150&lines=%3C%7C%E2%80%94%E2%80%94%E2%80%94%E2%80%94%E2%80%94+proXXy+%E2%80%94%E2%80%94%E2%80%94%E2%80%94%E2%80%94%7C%3E" alt="Typing SVG" /></a>
   
   <p align="center">
     <strong>proXXy</strong> is a powerful tool designed for acquiring and managing a vast quantity of proxies. It is used to gather, organize, and procure HTTP/S, SOCKS4, and SOCKS5 proxies. They can be used for web scraping, penetration testing, bypassing censorship, and many other tasks!

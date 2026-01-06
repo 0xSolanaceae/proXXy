@@ -47,7 +47,7 @@ poetry shell
 - Run the scraper (validation is opt-in via `-V`):
 
 ```bash
-python proXXy.py
+python proXXy.py --concurrency 200 --timeout 8
 ```
 
 The program will modify four files in the `output/` directory with your proxies:
@@ -59,15 +59,20 @@ The program will modify four files in the `output/` directory with your proxies:
 
  with a logfile (`error.log`) with warnings/errors.
 
-### Benchmarking the validator
+### Speeding up validation
 
-The async validator can be micro-benchmarked against your network limits:
+Validation now has tunable knobs and early exit:
 
 ```bash
-python benchmarks/bench_validate.py --concurrency 80 --timeout 5 --repeat 3 --limit 5 --quiet
+python proXXy.py -V \
+  --val-concurrency 800 \
+  --val-timeout 2 \
+  --val-limit 50000
 ```
 
-Use `--limit` to cap URLs per protocol when you just want quick measurements.
+- `--val-concurrency`: how many proxies to test in parallel (higher is faster until your network or the judge sites throttle).
+- `--val-timeout`: per-proxy timeout seconds.
+- `--val-limit`: stop once this many valid proxies are found (0 = validate everything).
 
 ## Flags
 
@@ -75,58 +80,60 @@ Syntax for running proXXy is as follows:
 
 ```bash
 usage: proXXy.py [-h] [--validate] [--update] [--version] [--src_check]
+                 [--concurrency CONCURRENCY] [--timeout TIMEOUT]
+                 [--val-concurrency VAL_CONCURRENCY] [--val-timeout VAL_TIMEOUT]
+                 [--val-limit VAL_LIMIT]
 ```
 
-1. `-V, --validate`: This flag enables proxy validation. The scraper will look to validate the scraped proxies by checking their accessibility.
-
-2. `-u, --update`: This flag updates the project. Cannot be used in conjunction with any other flag.
-
-3. `-h, --help`: Use this flag to spit out a help menu.
-
-4. `-v, --version`: Use this flag to spit out `proXXy.py`'s version.
-
-5. `-s, --src_check`: Use this flag to categorize the sources according to how many proxies they provide.
+1. `-V, --validate`: Validate HTTP/HTTPS outputs after scraping.
+2. `-u, --update`: Run the update script and exit.
+3. `-h, --help`: Show help.
+4. `-v, --version`: Print the script version and exit.
+5. `-s, --src_check`: Check sources and show counts only.
+6. `--concurrency / --timeout`: Tuning for source fetching.
+7. `--val-concurrency / --val-timeout / --val-limit`: Tuning for validation speed and early exit.
 
 ```bash
 usage: proXXy.py [-h] [--validate] [--update] [--version] [--src_check]
+                 [--concurrency CONCURRENCY] [--timeout TIMEOUT]
+                 [--val-concurrency VAL_CONCURRENCY] [--val-timeout VAL_TIMEOUT]
+                 [--val-limit VAL_LIMIT]
 
-A super simple asynchronous multithreaded proxy scraper;
-scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.
+Fast async proxy scraper; scraping & checking HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.
 
 options:
-  -h, --help      show this help message and exit
-  --validate, -v  Flag to validate proxies after scraping (default: False)
-  --update, -u    Flag to run the update script and then exit
-  --version, -V   Print the version of the script and exit
-  --src_check, -s Flag to verify sources
+  -h, --help            show this help message and exit
+  --validate, -V        Validate proxies after scraping (default: False)
+  --update, -u          Run the update script and then exit
+  --version, -v         Print the version of the script and exit
+  --src_check, -s       Verify sources only and exit
+  --concurrency, -c     Concurrent source fetches (default: 120)
+  --timeout, -t         Per-source timeout seconds (default: 8)
+  --val-concurrency     Validation concurrency (default: 400)
+  --val-timeout         Validation timeout seconds (default: 3)
+  --val-limit           Stop validation after N valid proxies (0 = no limit)
 ```
 
 ## Performance notes
 
-- Source validation now uses `asyncio` + `aiohttp` instead of spinning thousands of threads, cutting CPU/RAM overhead while keeping high concurrency.
+- Source scraping and validation both use `asyncio` + `aiohttp` with configurable concurrency/timeouts.
+- Validation can stop early via `--val-limit` to avoid hours-long runs when you only need N good proxies.
 - Proxy list writes are deduped in-memory before flushing to disk.
-- Optional Cython accelerators live in `utils.pyx` (unique-preserve + fast line counting). Build with `python setup.py build_ext --inplace` if you want the native speedup.
 
 ## Planned Features
 
 - Implement SOCKS4 & SOCKS5 validation.
-- Add CLI tuning flags for concurrency/timeout.
 - Discerning between Elite, Anonymous, and Transparent anonymity classes of proxies.
 
 ## Support
 
-Need help and can't get it to run correctly? Open an issue or use the [contact page](https://solanaceae.xyz/).
+Need help and can't get it to run correctly? Open an issue or use my [contact page](https://solanaceae.xyz/).
 
 ## Sponsorship
 
 If you like what I do, buy me boba so I can continue developing this tool and others!
 [Ko-Fi](https://ko-fi.com/solanaceae)
 
-## Changelog
-
-[Release v2.6](https://github.com/0xSolanaceae/proXXy/releases/tag/v2.6)
-
-- [Full changelog](https://github.com/0xSolanaceae/proXXy/compare/v2.5...v2.6)
 
 ---
 

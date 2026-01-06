@@ -1,7 +1,7 @@
 [tool.poetry]
 package-mode = false
 name = "proXXy"
-version = "v2.6"
+version = "v2.7"
 description = "A super simple asynchronous multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies."
 authors = ["Solanaceae"]
 license = "GPL-3.0 license"

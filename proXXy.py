@@ -1,27 +1,25 @@
 #!/usr/bin/python3
 # Built by Solanaceae -- https://solanaceae.xyz/
-import os
-import re
-import json
-import time
-import yaml
-import utils
-import shutil
-import random
-import pystyle
-import logging
 import argparse
-import platform
 import asyncio
-import aiohttp
-import src_check
+import json
+import logging
+import os
+import platform
+import shutil
 import subprocess
-from yaspin import yaspin
-from urllib import request as urllib_request, error as urllib_error
-from scrapy import Spider, Request
-from scrapy.crawler import CrawlerProcess
+import time
+from typing import Dict, List
 
-SCRIPT_VERSION = 'v2.6'
+import pystyle
+import utils
+from urllib import error as urllib_error
+from urllib import request as urllib_request
+from yaspin import yaspin
+
+import src_check
+
+SCRIPT_VERSION = 'v2.7'
 
 def banner(script_version):
     banner = r"""
@@ -66,190 +64,10 @@ def init_spinner(script_version: str = SCRIPT_VERSION):
     banner(script_version)
     with yaspin().bouncingBar as sp:
         sp.text = "Initializing..."
-        time.sleep(2.5)
-        sp.ok("[_OK_]")
         time.sleep(1.5)
+        sp.ok("[_OK_]")
+        time.sleep(0.5)
 
-async def validate_proxies_async(proxy_sources, output_dir="validated", timeout=5, concurrency=50, script_version: str = SCRIPT_VERSION, render_banners: bool = True):
-    os.makedirs(output_dir, exist_ok=True)
-    valid_urls, invalid_urls = {}, {}
-
-    start_time = time.time()
-    url_width = 120
-
-    connector = aiohttp.TCPConnector(limit=0)
-    timeout_cfg = aiohttp.ClientTimeout(total=timeout)
-
-    async with aiohttp.ClientSession(connector=connector, timeout=timeout_cfg) as session:
-        async def fetch(protocol, url):
-            cleaned_url = f"{url.split('//')[-1]:<{url_width}}"
-            started = time.perf_counter()
-            try:
-                async with session.get(url) as response:
-                    elapsed_ms = round((time.perf_counter() - started) * 1000, 1)
-                    return protocol, url, response.status, elapsed_ms, cleaned_url
-            except Exception as e:
-                logging.error(f"Error checking URL {url}: {e}")
-                return protocol, url, None, None, cleaned_url
-
-        for protocol, urls in proxy_sources.items():
-            print(f"{protocol} source checking...\n")
-            valid_urls[protocol] = []
-            invalid_urls[protocol] = []
-
-            sem = asyncio.Semaphore(concurrency)
-
-            async def gated_fetch(url):
-                async with sem:
-                    return await fetch(protocol, url)
-
-            tasks = [asyncio.create_task(gated_fetch(url)) for url in urls]
-
-            for task in asyncio.as_completed(tasks):
-                protocol_name, url, status, response_time_ms, cleaned_url = await task
-
-                if status and 200 <= status < 400:
-                    print(f'{pystyle.Colorate.Color(pystyle.Colors.green, f"[+] VALID: {cleaned_url}", True)} || {response_time_ms:,} ms')
-                    valid_urls[protocol_name].append({'url': url, 'response_time_ms': response_time_ms})
-                else:
-                    print(f'{pystyle.Colorate.Color(pystyle.Colors.red, f"[-] INVALID: {cleaned_url}", True)}| ERROR')
-                    invalid_urls[protocol_name].append({'url': url, 'response_time_ms': response_time_ms})
-
-            if render_banners:
-                banner(script_version)
-
-    valid_file_path = os.path.join(output_dir, 'VALID.yaml')
-    invalid_file_path = os.path.join(output_dir, 'INVALID.yaml')
-
-    with open(valid_file_path, 'w') as file:
-        yaml.dump(valid_urls, file)
-
-    with open(invalid_file_path, 'w') as file:
-        yaml.dump(invalid_urls, file)
-
-    report_validation_summary(valid_file_path, invalid_file_path, start_time)
-
-
-def validate_proxies(proxy_sources, output_dir="validated", timeout=5, concurrency=50, render_banners: bool = True):
-    asyncio.run(
-        validate_proxies_async(
-            proxy_sources,
-            output_dir=output_dir,
-            timeout=timeout,
-            concurrency=concurrency,
-            script_version=SCRIPT_VERSION,
-            render_banners=render_banners,
-        )
-    )
-
-def save_proxies(proxy_list, file_path):
-    with open(file_path, 'w') as file:
-        file.writelines(f"{url}\n" for url in proxy_list)
-
-def load_yaml(file_path):
-    if not os.path.exists(file_path) or os.stat(file_path).st_size == 0:
-        return {}
-    with open(file_path, 'r') as file:
-        return yaml.safe_load(file) or {}
-
-def report_validation_summary(valid_file_path, invalid_file_path, start_time):
-    valid_urls = load_yaml(valid_file_path)
-    invalid_urls = load_yaml(invalid_file_path)
-
-    accessed = sum(len(url_list) for url_list in valid_urls.values())
-    not_accessed = sum(len(url_list) for url_list in invalid_urls.values())
-
-    elapsed_time = round(time.time() - start_time, 2)
-
-    print(f"Validation complete: {accessed} valid URLs, {not_accessed} invalid URLs.")
-    print(f"Time taken: {elapsed_time} seconds")
-    print(vanity_line())
-
-    logging.info(f"Validation summary: {accessed} valid URLs, {not_accessed} invalid URLs in {elapsed_time} seconds")
-
-class ProxySpider(Spider):
-    name = 'proxy_spider'
-    user_agents = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15",
-        "Mozilla/5.0 (Linux; Android 10; SM-G960F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Mobile Safari/537.36",
-        "Mozilla/5.0 (Linux; Ubuntu 20.04; rv:89.0) Gecko/20100101 Firefox/89.0"
-    ]
-    custom_settings = {
-        'LOG_LEVEL': 'ERROR', # https://docs.scrapy.org/en/latest/topics/logging.html
-        'DOWNLOAD_TIMEOUT': 5,
-        'RETRY_TIMES': 2,
-        'RETRY_HTTP_CODES': [500, 502, 503, 504, 408],
-        'USER_AGENT': random.choice(user_agents),
-    }
-
-    def start_requests(self):
-        sources = utils.proxy_sources()
-        for protocol, urls in sources.items():
-            for url in urls:
-                yield Request(url, callback=self.parse, meta={'protocol': protocol})
-
-    def parse(self, response):
-        protocol = response.meta['protocol']
-        proxies = self.extract_proxies(response.text)
-        self.save_proxies(protocol, proxies)
-
-    def extract_proxies(self, html_content):
-        proxy_pattern = re.compile(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+')
-        return proxy_pattern.findall(html_content)
-
-    def save_proxies(self, protocol, proxies):
-        os.makedirs("output", exist_ok=True)
-        file_path = f"output/{protocol}.txt"
-        with open(file_path, 'a') as file:
-            for proxy in proxies:
-                file.write(f"{proxy}\n")
-
-def proxy_scrape():
-    global total_scraped
-    process = CrawlerProcess()
-    process.crawl(ProxySpider)
-    process.start()
-
-    output_files = ['output/HTTP.txt', 'output/HTTPS.txt', 'output/SOCKS4.txt', 'output/SOCKS5.txt']
-    total_scraped = sum(count_lines(file) for file in output_files)
-    
-    print(f'\n[+] {total_scraped:,} proxies scraped.')
-
-
-def count_lines(file_path):
-    if not os.path.isfile(file_path):
-        logging.error(f"File not found: {file_path}")
-        return 0
-
-    try:
-        with open(file_path, 'r') as file:
-            return sum(1 for _ in file)
-    except IOError as e:
-        logging.error(f"Error reading file {file_path}: {e}")
-        return 0
-
- 
-def proxy_clean(http_file, https_file, socks4_file, socks5_file):
-    def remove_duplicates(input_file):
-        with open(input_file, 'r') as file:
-            unique_proxies = set(file.readlines())
-
-        with open(input_file, 'w') as file:
-            file.writelines(unique_proxies)
-
-    proxy_files = [http_file, https_file, socks4_file, socks5_file]
-    output_files = ['output/HTTP.txt', 'output/HTTPS.txt', 'output/SOCKS4.txt', 'output/SOCKS5.txt']
-
-    for file in proxy_files:
-        remove_duplicates(file)
-
-    total_sanitized = sum(count_lines(output) for output in output_files)
-    total = total_scraped - total_sanitized
-
-    print(f"[+] {total:,} proxies sanitized.")
-    print(vanity_line())
 
 def run_update_script(script_version):
     current_os = platform.system()
@@ -297,14 +115,54 @@ def update_notif(release_info, script_version):
     print(f"[+] A new version is available: {latest_version}. You are running {script_version}.")
     print("[+] Please update your script to the latest version by using the -u flag.")
     return True
-    
+
+def scrape_and_write(
+    sources: Dict[str, List[str]],
+    *,
+    output_dir: str = "output",
+    concurrency: int = 120,
+    timeout: int = 8,
+    retries: int = 2,
+    backoff: float = 0.5,
+) -> Dict[str, List[str]]:
+    os.makedirs(output_dir, exist_ok=True)
+    proxies_by_protocol = asyncio.run(
+        utils.scrape_sources_async(
+            sources,
+            concurrency=concurrency,
+            timeout=timeout,
+            retries=retries,
+            backoff=backoff,
+        )
+    )
+
+    for protocol, proxies in proxies_by_protocol.items():
+        filepath = os.path.join(output_dir, f"{protocol}.txt")
+        utils.write_proxy_file(filepath, proxies)
+
+    return proxies_by_protocol
+
+
+def summarize(proxies_by_protocol: Dict[str, List[str]]):
+    total = sum(len(v) for v in proxies_by_protocol.values())
+    for proto, proxies in proxies_by_protocol.items():
+        print(f"[+] {proto}: {len(proxies):,} proxies")
+    print(f"\n[+] {total:,} total proxies scraped.")
+    print(vanity_line())
+
+
 def main():
     script_version = SCRIPT_VERSION
-    parser = argparse.ArgumentParser(description='A super simple asynchronous multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.')
-    parser.add_argument('--validate', '-V', action='store_true', help='Flag to validate proxies after scraping (default: False)')
-    parser.add_argument('--update', '-u', action='store_true', help='Flag to run the update script and then exit')
-    parser.add_argument('--version', '-v', action='version', version=f'%(prog)s {script_version}', help='Print the version of the script and exit')
-    parser.add_argument('--src_check', '-s', action='store_true', help='Flag to verify sources')
+    parser = argparse.ArgumentParser(description='Fast async proxy scraper with optional validation')
+    parser.add_argument('--validate', '-V', action='store_true', help='Validate HTTP/HTTPS proxies after scraping')
+    parser.add_argument('--update', '-u', action='store_true', help='Run the update script and exit')
+    parser.add_argument('--version', '-v', action='version', version=f'%(prog)s {script_version}', help='Print the script version and exit')
+    parser.add_argument('--src_check', '-s', action='store_true', help='Verify sources only and exit')
+    parser.add_argument('--concurrency', '-c', type=int, default=120, help='Concurrent source fetches (default: 120)')
+    parser.add_argument('--timeout', '-t', type=int, default=8, help='Per-source timeout seconds (default: 8)')
+    parser.add_argument('--val-concurrency', type=int, default=400, help='Validation concurrency (default: 400)')
+    parser.add_argument('--val-timeout', type=int, default=3, help='Validation timeout seconds (default: 3)')
+    parser.add_argument('--val-limit', type=int, default=0, help='Stop validation after N valid proxies (0 = no limit)')
     args = parser.parse_args()
 
     if args.update:
@@ -312,28 +170,42 @@ def main():
         return
 
     if check_for_update(script_version):
-        time.sleep(2.5)
-        
+        time.sleep(1.5)
+
     if args.src_check:
         src_check.main()
         return
 
-    for filename in ['output/HTTP.txt', 'output/HTTPS.txt', 'output/SOCKS4.txt', 'output/SOCKS5.txt']: open(filename, 'w').close()
-
     init_logging()
     init_spinner(script_version)
     banner(script_version)
-    proxies = utils.proxy_sources()
 
-    validate_proxies(proxies)
+    sources = utils.proxy_sources()
 
-    proxy_scrape()
-    proxy_clean('output/HTTP.txt', 'output/HTTPS.txt', 'output/SOCKS4.txt', 'output/SOCKS5.txt')
+    proxies_by_protocol = scrape_and_write(
+        sources,
+        concurrency=max(10, args.concurrency),
+        timeout=max(3, args.timeout),
+    )
+
+    summarize(proxies_by_protocol)
 
     if args.validate:
-        utils.http_check('output/HTTP.txt')
-        utils.https_check('output/HTTPS.txt')
+        limit = args.val_limit if args.val_limit > 0 else None
+        utils.http_check(
+            os.path.join('output', 'HTTP.txt'),
+            concurrency=max(10, args.val_concurrency),
+            timeout=max(1, args.val_timeout),
+            limit=limit,
+        )
+        utils.https_check(
+            os.path.join('output', 'HTTPS.txt'),
+            concurrency=max(10, args.val_concurrency),
+            timeout=max(1, args.val_timeout),
+            limit=limit,
+        )
         print(vanity_line())
+
 
 if __name__ == "__main__":
     main()

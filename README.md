@@ -25,34 +25,29 @@
 
 ```bash
 git clone https://github.com/0xSolanaceae/proXXy.git
-```
-
-- Navigate to project directory:
-
-```bash
 cd proXXy
 ```
 
-- Install dependencies with `poetry`:
+- Install dependencies (pip or poetry):
 
 ```bash
+pip install -r requirements.txt
+# or
 poetry install
 ```
 
-If you don't have `poetry` installed, install it [here](https://python-poetry.org/docs/#installation).
-
 ## Usage
 
-- Activate the poetry shell:
+- (Optional) activate the poetry shell:
 
 ```bash
 poetry shell
 ```
 
-- Running the program without flags results in only scraping, as checking is disabled by default:
+- Run the scraper (validation is opt-in via `-V`):
 
 ```bash
-python3 proXXy.py
+python proXXy.py
 ```
 
 The program will modify four files in the `output/` directory with your proxies:
@@ -63,6 +58,16 @@ The program will modify four files in the `output/` directory with your proxies:
 - `SOCKS5.txt`
 
  with a logfile (`error.log`) with warnings/errors.
+
+### Benchmarking the validator
+
+The async validator can be micro-benchmarked against your network limits:
+
+```bash
+python benchmarks/bench_validate.py --concurrency 80 --timeout 5 --repeat 3 --limit 5 --quiet
+```
+
+Use `--limit` to cap URLs per protocol when you just want quick measurements.
 
 ## Flags
 
@@ -96,17 +101,21 @@ options:
   --src_check, -s Flag to verify sources
 ```
 
+## Performance notes
+
+- Source validation now uses `asyncio` + `aiohttp` instead of spinning thousands of threads, cutting CPU/RAM overhead while keeping high concurrency.
+- Proxy list writes are deduped in-memory before flushing to disk.
+- Optional Cython accelerators live in `utils.pyx` (unique-preserve + fast line counting). Build with `python setup.py build_ext --inplace` if you want the native speedup.
+
 ## Planned Features
 
-- Fix Unix-like compatibility errors. `proXXy` currently does not support unix-like proxy checking.
-- Allow the user to choose the number of threads they'd like to use with flags, & provide the user recommended values based on their hardware.
-- Implement SOCKS4 & SOCKS5 testing.
-- Proxy sorting instead of hardcoding.
+- Implement SOCKS4 & SOCKS5 validation.
+- Add CLI tuning flags for concurrency/timeout.
 - Discerning between Elite, Anonymous, and Transparent anonymity classes of proxies.
 
 ## Support
 
-Need help and can't get it to run correctly? Open an issue or contact me [here](https://solanaceae.xyz/).
+Need help and can't get it to run correctly? Open an issue or use the [contact page](https://solanaceae.xyz/).
 
 ## Sponsorship
 
@@ -116,7 +125,8 @@ If you like what I do, buy me boba so I can continue developing this tool and ot
 ## Changelog
 
 [Release v2.6](https://github.com/0xSolanaceae/proXXy/releases/tag/v2.6)
-- Full changelog: https://github.com/0xSolanaceae/proXXy/compare/v2.5...v2.6
+
+- [Full changelog](https://github.com/0xSolanaceae/proXXy/compare/v2.5...v2.6)
 
 ---
 

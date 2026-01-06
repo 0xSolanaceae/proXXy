@@ -12,13 +12,16 @@ import pystyle
 import logging
 import argparse
 import platform
-import hrequests
+import asyncio
+import aiohttp
 import src_check
 import subprocess
 from yaspin import yaspin
-from urllib.parse import urlparse
+from urllib import request as urllib_request, error as urllib_error
 from scrapy import Spider, Request
 from scrapy.crawler import CrawlerProcess
+
+SCRIPT_VERSION = 'v2.6'
 
 def banner(script_version):
     banner = r"""
@@ -59,7 +62,7 @@ def init_logging():
     except Exception as e:
         print(f"Failed to initialize logging: {e}")
 
-def init_spinner():
+def init_spinner(script_version: str = SCRIPT_VERSION):
     banner(script_version)
     with yaspin().bouncingBar as sp:
         sp.text = "Initializing..."
@@ -67,64 +70,53 @@ def init_spinner():
         sp.ok("[_OK_]")
         time.sleep(1.5)
 
-def check_url_validity(url, timeout=5):
-    global response_time_ms
-    try:
-        parsed_url = urlparse(url)
-        if not parsed_url.scheme or not parsed_url.netloc:
-            logging.error(f"Invalid URL format: {url}")
-            return False, None
-
-        response = hrequests.get(url, nohup=True, timeout=timeout)
-        response_time_ms = round(response.elapsed.total_seconds() * 1000, 1)
-        
-        if response.status_code == 200:
-            return True, response_time_ms
-        else:
-            return False, None
-    except Exception as e:
-        logging.error(f"Error checking URL {url}: {e}")
-        return False, None
-
-def validate_proxies(proxy_sources, output_dir="validated", timeout=5):
+async def validate_proxies_async(proxy_sources, output_dir="validated", timeout=5, concurrency=50, script_version: str = SCRIPT_VERSION, render_banners: bool = True):
     os.makedirs(output_dir, exist_ok=True)
     valid_urls, invalid_urls = {}, {}
 
     start_time = time.time()
     url_width = 120
 
-    for protocol, urls in proxy_sources.items():
-        print(f"{protocol} source checking...\n")
+    connector = aiohttp.TCPConnector(limit=0)
+    timeout_cfg = aiohttp.ClientTimeout(total=timeout)
 
-        valid_urls[protocol] = []
-        invalid_urls[protocol] = []
-
-        responses = hrequests.get(urls, nohup=True, timeout=timeout)
-
-        for i, response in enumerate(responses):
-            url = urls[i]
+    async with aiohttp.ClientSession(connector=connector, timeout=timeout_cfg) as session:
+        async def fetch(protocol, url):
             cleaned_url = f"{url.split('//')[-1]:<{url_width}}"
-
+            started = time.perf_counter()
             try:
-                response_time_ms = round(response.elapsed.total_seconds() * 1000, 1)
+                async with session.get(url) as response:
+                    elapsed_ms = round((time.perf_counter() - started) * 1000, 1)
+                    return protocol, url, response.status, elapsed_ms, cleaned_url
+            except Exception as e:
+                logging.error(f"Error checking URL {url}: {e}")
+                return protocol, url, None, None, cleaned_url
 
-                if response.status_code == 200:
+        for protocol, urls in proxy_sources.items():
+            print(f"{protocol} source checking...\n")
+            valid_urls[protocol] = []
+            invalid_urls[protocol] = []
+
+            sem = asyncio.Semaphore(concurrency)
+
+            async def gated_fetch(url):
+                async with sem:
+                    return await fetch(protocol, url)
+
+            tasks = [asyncio.create_task(gated_fetch(url)) for url in urls]
+
+            for task in asyncio.as_completed(tasks):
+                protocol_name, url, status, response_time_ms, cleaned_url = await task
+
+                if status and 200 <= status < 400:
                     print(f'{pystyle.Colorate.Color(pystyle.Colors.green, f"[+] VALID: {cleaned_url}", True)} || {response_time_ms:,} ms')
-                    valid_urls[protocol].append({'url': url, 'response_time_ms': response_time_ms})
+                    valid_urls[protocol_name].append({'url': url, 'response_time_ms': response_time_ms})
                 else:
                     print(f'{pystyle.Colorate.Color(pystyle.Colors.red, f"[-] INVALID: {cleaned_url}", True)}| ERROR')
-                    invalid_urls[protocol].append({'url': url, 'response_time_ms': response_time_ms})
+                    invalid_urls[protocol_name].append({'url': url, 'response_time_ms': response_time_ms})
 
-                time.sleep(0.05)
-            except Exception as e:
-                logging.error(f"Error processing URL {url}: {e}")
-                print(
-                    f'{pystyle.Colorate.Color(pystyle.Colors.red, f"[-] INVALID: {cleaned_url}", True)}| ERROR'
-                )
-                invalid_urls[protocol].append({'url': url, 'response_time_ms': None})
-
-        time.sleep(0.5)
-        banner(script_version)
+            if render_banners:
+                banner(script_version)
 
     valid_file_path = os.path.join(output_dir, 'VALID.yaml')
     invalid_file_path = os.path.join(output_dir, 'INVALID.yaml')
@@ -136,6 +128,19 @@ def validate_proxies(proxy_sources, output_dir="validated", timeout=5):
         yaml.dump(invalid_urls, file)
 
     report_validation_summary(valid_file_path, invalid_file_path, start_time)
+
+
+def validate_proxies(proxy_sources, output_dir="validated", timeout=5, concurrency=50, render_banners: bool = True):
+    asyncio.run(
+        validate_proxies_async(
+            proxy_sources,
+            output_dir=output_dir,
+            timeout=timeout,
+            concurrency=concurrency,
+            script_version=SCRIPT_VERSION,
+            render_banners=render_banners,
+        )
+    )
 
 def save_proxies(proxy_list, file_path):
     with open(file_path, 'w') as file:
@@ -270,24 +275,22 @@ def run_update_script(script_version):
 
 def check_for_update(script_version):
     banner(script_version)
-    api_url = (
-        "https://api.github.com/repos/0xSolanaceae/proXXy/releases/latest"
-    )
+    api_url = "https://api.github.com/repos/0xSolanaceae/proXXy/releases/latest"
 
     try:
-        response = hrequests.get(api_url)
-
-        if response.status_code == 200:
-            return update_notif(response, script_version)
-        print(f"[-] Failed to check for updates. HTTP Status Code: {response.status_code}")
-        return False
-    except Exception as e:
+        with urllib_request.urlopen(api_url, timeout=5) as resp:
+            if resp.status == 200:
+                release_info = json.loads(resp.read().decode('utf-8'))
+                return update_notif(release_info, script_version)
+            print(f"[-] Failed to check for updates. HTTP Status Code: {resp.status}")
+            return False
+    except (urllib_error.URLError, urllib_error.HTTPError) as e:
         print(f"[-] Error checking for updates: {e}")
         return False
 
-def update_notif(response, script_version):
-    release_info = json.loads(response.text)
-    latest_version = release_info['tag_name']
+
+def update_notif(release_info, script_version):
+    latest_version = release_info.get('tag_name', script_version)
 
     if script_version >= latest_version:
         return False
@@ -296,8 +299,7 @@ def update_notif(response, script_version):
     return True
     
 def main():
-    global script_version
-    script_version = 'v2.6'
+    script_version = SCRIPT_VERSION
     parser = argparse.ArgumentParser(description='A super simple asynchronous multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.')
     parser.add_argument('--validate', '-V', action='store_true', help='Flag to validate proxies after scraping (default: False)')
     parser.add_argument('--update', '-u', action='store_true', help='Flag to run the update script and then exit')
@@ -319,7 +321,7 @@ def main():
     for filename in ['output/HTTP.txt', 'output/HTTPS.txt', 'output/SOCKS4.txt', 'output/SOCKS5.txt']: open(filename, 'w').close()
 
     init_logging()
-    init_spinner()
+    init_spinner(script_version)
     banner(script_version)
     proxies = utils.proxy_sources()
 

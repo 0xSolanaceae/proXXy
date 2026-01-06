@@ -51,86 +51,116 @@ def http_check(PROXY_LIST_FILE: str):
         with yaspin().bouncingBar as sp:
             sp.text = f"Initializing threads for {PROXY_LIST_FILE}..."
             with ThreadPoolExecutor(max_workers=max_threads) as executor:
-                results: List[str | None] = []
-                progress_started = False
-                for result in tqdm(executor.map(test_proxy, http_proxies), total=len(http_proxies), desc="[*] Checking HTTP Proxies", ascii=" #", unit= " prox"):
-                    if not progress_started:
-                        sp.text = "Threads initialized."
-                        sp.ok("[_OK_]")
-                        sp.stop()
-                        progress_started = True
-                    results.append(result)
+                import os
+                import json
+                import time
+                import logging
+                import asyncio
+                import aiohttp
+                from functools import lru_cache
+                from typing import Dict, List
+                from tqdm import tqdm
 
-        http_valid_proxies = [proxy for proxy in results if proxy is not None]
 
-        end_time = time.time()
-        total_time = end_time - start_time
-        total_minutes = total_time // 60
-        remaining_seconds = total_time % 60
-        print("[*] Total time for Execution:", f"{int(total_minutes)} minute(s) and {round(remaining_seconds, 2)} seconds")
+                def load_proxy_sources(file_path: str) -> Dict[str, List[str]]:
+                    with open(file_path, 'r') as file:
+                        return json.load(file)
 
-        print(f"[*] Valid HTTP Proxies: {len(http_valid_proxies):,}\n")
 
-        with open(PROXY_LIST_FILE, 'w') as f:
-            for proxy in http_valid_proxies:
-                f.write(proxy + '\n')
+                @lru_cache(maxsize=1)
+                def proxy_sources() -> Dict[str, List[str]]:
+                    # Cache disk reads; sources rarely change during a run.
+                    return load_proxy_sources('proxy_sources.json')
 
-    main()
-    
 
-def https_check(PROXY_LIST_FILE: str):
-    # FIXME tell the user the anonymity level of the proxy
-    # FIXME add in socks4/5 verification
-    TEST_URL = "https://api.myip.com:443/"
-    TIMEOUT = 5
-    # Ensure logs are written under output/
-    os.makedirs('output', exist_ok=True)
-    logging.basicConfig(filename='output/error.log', level=logging.ERROR)
+                async def _check_proxies_async(proxies: List[str], test_url: str, proxy_scheme: str = 'http', concurrency: int = 200, timeout: int = 5) -> List[str]:
+                    connector = aiohttp.TCPConnector(limit=0)
+                    timeout_cfg = aiohttp.ClientTimeout(total=timeout)
+                    sem = asyncio.Semaphore(concurrency)
+                    valid: List[str] = []
 
-    def test_proxy(proxy: str):
-        with contextlib.suppress(Exception):
-            response = requests.get(TEST_URL, proxies={'https': proxy}, timeout=TIMEOUT)
-            if 100 <= response.status_code < 400:
-                return proxy
-        return None
+                    async with aiohttp.ClientSession(connector=connector, timeout=timeout_cfg) as session:
+                        async def check(proxy: str):
+                            proxy_url = f"{proxy_scheme}://{proxy}"
+                            async with sem:
+                                try:
+                                    async with session.get(test_url, proxy=proxy_url) as resp:
+                                        if 100 <= resp.status < 400:
+                                            return proxy
+                                except Exception:
+                                    return None
+                            return None
 
-    def main():
-        start_time = time.time()
-        https_proxies: List[str] = []
+                        tasks = [check(p) for p in proxies]
 
-        with open(PROXY_LIST_FILE, 'r') as f:
-            https_proxies = [line.strip() for line in f.readlines()]
+                        for coro in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc=f"Checking ({proxy_scheme.upper()}) proxies", ascii=True, unit=" prox"):
+                            result = await coro
+                            if result:
+                                valid.append(result)
 
-        cpu_count = os.cpu_count() or 1
-        max_threads = cpu_count * 250 or 1000
+                    return valid
 
-        print(f"[*] Utilizing {max_threads:,} threads, calculated from your device's {cpu_count} CPU cores.")
 
-        with yaspin().bouncingBar as sp:
-            sp.text = f"Initializing threads for {PROXY_LIST_FILE}..."
-            with ThreadPoolExecutor(max_workers=max_threads) as executor:
-                results: List[str | None] = []
-                progress_started = False
-                for result in tqdm(executor.map(test_proxy, https_proxies), total=len(https_proxies), desc="[*] Checking HTTPS Proxies", ascii=" #", unit= " prox"):
-                    if not progress_started:
-                        sp.text = "Threads initialized."
-                        sp.ok("[_OK_]")
-                        sp.stop()
-                        progress_started = True
-                    results.append(result)
+                def _read_proxy_file(path: str) -> List[str]:
+                    if not os.path.isfile(path):
+                        return []
+                    with open(path, 'r') as f:
+                        return [line.strip() for line in f if line.strip()]
 
-        https_valid_proxies = [proxy for proxy in results if proxy is not None]
 
-        end_time = time.time()
-        total_time = end_time - start_time
-        total_minutes = total_time // 60
-        remaining_seconds = total_time % 60
-        print("[*] Total time for Execution:", f"{int(total_minutes)} minute(s) and {round(remaining_seconds, 2)} seconds")
+                def _write_proxy_file(path: str, proxies: List[str]):
+                    with open(path, 'w') as f:
+                        for p in proxies:
+                            f.write(p + '\n')
 
-        print(f"[*] Valid HTTPS Proxies: {len(https_valid_proxies):,}")
 
-        with open(PROXY_LIST_FILE, 'w') as f:
-            for proxy in https_valid_proxies:
-                f.write(proxy + '\n')
+                def _dedupe_preserve_order(proxies: List[str]) -> List[str]:
+                    seen = set()
+                    out: List[str] = []
+                    for p in proxies:
+                        if p not in seen:
+                            seen.add(p)
+                            out.append(p)
+                    return out
 
-    main()
+
+                def http_check(PROXY_LIST_FILE: str, concurrency: int = 200, timeout: int = 5):
+                    os.makedirs('output', exist_ok=True)
+                    logging.basicConfig(filename='output/error.log', level=logging.ERROR)
+
+                    TEST_URL = "http://httpbin.org/ip"
+
+                    proxies = _read_proxy_file(PROXY_LIST_FILE)
+                    if not proxies:
+                        print(f"No proxies found in {PROXY_LIST_FILE}")
+                        return
+
+                    start = time.time()
+                    valid = asyncio.run(_check_proxies_async(proxies, TEST_URL, proxy_scheme='http', concurrency=concurrency, timeout=timeout))
+                    elapsed = time.time() - start
+
+                    print(f"[*] Total time for Execution: {int(elapsed // 60)} minute(s) and {round(elapsed % 60, 2)} seconds")
+                    print(f"[*] Valid HTTP Proxies: {len(valid):,}\n")
+
+                    _write_proxy_file(PROXY_LIST_FILE, _dedupe_preserve_order(valid))
+
+
+                def https_check(PROXY_LIST_FILE: str, concurrency: int = 200, timeout: int = 5):
+                    os.makedirs('output', exist_ok=True)
+                    logging.basicConfig(filename='output/error.log', level=logging.ERROR)
+
+                    TEST_URL = "https://api.myip.com/"
+
+                    proxies = _read_proxy_file(PROXY_LIST_FILE)
+                    if not proxies:
+                        print(f"No proxies found in {PROXY_LIST_FILE}")
+                        return
+
+                    start = time.time()
+                    valid = asyncio.run(_check_proxies_async(proxies, TEST_URL, proxy_scheme='http', concurrency=concurrency, timeout=timeout))
+                    elapsed = time.time() - start
+
+                    print(f"[*] Total time for Execution: {int(elapsed // 60)} minute(s) and {round(elapsed % 60, 2)} seconds")
+                    print(f"[*] Valid HTTPS Proxies: {len(valid):,}")
+
+                    _write_proxy_file(PROXY_LIST_FILE, _dedupe_preserve_order(valid))

@@ -93,5 +93,8 @@
     "https://raw.githubusercontent.com/officialputuid/KangProxy/KangProxy/https/https.txt",
     "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/https.txt",
     "https://raw.githubusercontent.com/proxifly/free-proxy-list/refs/heads/main/proxies/protocols/https/data.txt"
+  ],
+  "ALL": [
+    "https://rcloak.com/api/proxies/raw?protocol=all"
   ]
 }
